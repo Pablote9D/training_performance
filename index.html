@@ -2,147 +2,39 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Training Performance</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
-  <header class="top">
-    <h1>Training Performance</h1>
-    <nav class="tabs" role="tablist">
-      <button role="tab" data-tab="natacion" aria-selected="true">Natación</button>
-      <button role="tab" data-tab="golf" aria-selected="false">Golf</button>
-    </nav>
-    <div class="filters">
-      <label>Período
-        <select id="periodo">
-          <option value="30">Últimos 30 días</option>
-          <option value="90" selected>Últimos 90 días</option>
-          <option value="365">Último año</option>
-          <option value="0">Todo</option>
-        </select>
-      </label>
-      <button id="theme-toggle" class="ghost" title="Cambiar tema">◐</button>
-    </div>
-  </header>
+  <nav class="tabbar" aria-label="Secciones">
+    <a href="#/" data-nav="resumen">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/></svg>
+      <span>Resumen</span>
+    </a>
+    <a href="#/natacion" data-nav="natacion">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 18c2 0 2-1.5 4-1.5S8 18 10 18s2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5"/><circle cx="16" cy="7" r="2"/><path d="M4 13l5-4 3 2 4-2"/></svg>
+      <span>Natación</span>
+    </a>
+    <a href="#/golf" data-nav="golf">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21V3l9 4-9 4"/><ellipse cx="12" cy="21" rx="7" ry="1.5"/></svg>
+      <span>Golf</span>
+    </a>
+  </nav>
 
-  <p id="aviso" class="aviso" hidden></p>
-
-  <!-- ───────────── NATACIÓN ───────────── -->
-  <main id="tab-natacion" class="tab">
-    <section class="kpis" id="swim-kpis"></section>
-
-    <section class="grid">
-      <figure class="card wide">
-        <figcaption><h2>Distancia semanal</h2><span class="sub">metros por semana</span></figcaption>
-        <div class="chart"><canvas id="swim-weekly"></canvas></div>
-      </figure>
-      <figure class="card">
-        <figcaption><h2>Ritmo promedio</h2><span class="sub">min/100 m por sesión · menor es mejor</span></figcaption>
-        <div class="chart"><canvas id="swim-pace"></canvas></div>
-      </figure>
-      <figure class="card">
-        <figcaption><h2>Metros por estilo</h2><span class="sub">total del período</span></figcaption>
-        <div class="chart"><canvas id="swim-stroke"></canvas></div>
-      </figure>
-    </section>
-
-    <section class="card">
-      <details>
-        <summary>+ Agregar sesión de natación</summary>
-        <form id="swim-form" class="form">
-          <label>Fecha <input type="date" name="fecha" required></label>
-          <label>Distancia (m) <input type="number" name="distancia_m" min="25" step="25" required></label>
-          <label>Duración (min) <input type="number" name="duracion_min" min="1" required></label>
-          <label>Estilo
-            <select name="estilo">
-              <option>libre</option><option>espalda</option><option>pecho</option>
-              <option>mariposa</option><option>combinado</option>
-            </select>
-          </label>
-          <label>Tipo
-            <select name="tipo">
-              <option value="aerobico">aeróbico</option><option value="series">series</option>
-              <option value="tecnica">técnica</option><option value="competencia">competencia</option>
-            </select>
-          </label>
-          <label>Esfuerzo (RPE 1-10) <input type="number" name="rpe" min="1" max="10"></label>
-          <label class="full">Notas <input type="text" name="notas"></label>
-          <button type="submit">Guardar</button>
-        </form>
-      </details>
-    </section>
-
-    <section class="card">
-      <div class="table-head">
-        <h2>Sesiones</h2>
-        <div class="actions">
-          <button class="ghost" data-export="natacion">Exportar CSV</button>
-          <label class="ghost file">Importar CSV<input type="file" accept=".csv" data-import="natacion" hidden></label>
-        </div>
-      </div>
-      <div class="table-wrap"><table id="swim-table"></table></div>
-    </section>
+  <main id="app" class="app" aria-live="polite">
+    <p class="loading">Cargando…</p>
   </main>
 
-  <!-- ───────────── GOLF ───────────── -->
-  <main id="tab-golf" class="tab" hidden>
-    <section class="kpis" id="golf-kpis"></section>
-
-    <section class="grid">
-      <figure class="card wide">
-        <figcaption><h2>Golpes sobre el par</h2><span class="sub">por ronda (9 hoyos se proyectan a 18) · menor es mejor</span></figcaption>
-        <div class="chart"><canvas id="golf-score"></canvas></div>
-      </figure>
-      <figure class="card">
-        <figcaption><h2>Putts por ronda</h2><span class="sub">proyectado a 18 hoyos</span></figcaption>
-        <div class="chart"><canvas id="golf-putts"></canvas></div>
-      </figure>
-      <figure class="card">
-        <figcaption><h2>Precisión</h2><span class="sub">% fairways y % greens en regulación</span></figcaption>
-        <div class="chart"><canvas id="golf-acc"></canvas></div>
-      </figure>
-    </section>
-
-    <section class="card">
-      <details>
-        <summary>+ Agregar ronda de golf</summary>
-        <form id="golf-form" class="form">
-          <label>Fecha <input type="date" name="fecha" required></label>
-          <label>Cancha <input type="text" name="cancha" required></label>
-          <label>Hoyos
-            <select name="hoyos"><option>18</option><option>9</option></select>
-          </label>
-          <label>Golpes <input type="number" name="golpes" min="1" required></label>
-          <label>Par <input type="number" name="par" min="27" value="72" required></label>
-          <label>Putts <input type="number" name="putts" min="0"></label>
-          <label>Fairways acertados <input type="number" name="fairways" min="0"></label>
-          <label>Fairways posibles <input type="number" name="fairways_total" min="0" value="14"></label>
-          <label>GIR <input type="number" name="gir" min="0"></label>
-          <label class="full">Notas <input type="text" name="notas"></label>
-          <input type="hidden" name="tipo" value="ronda">
-          <button type="submit">Guardar</button>
-        </form>
-      </details>
-    </section>
-
-    <section class="card">
-      <div class="table-head">
-        <h2>Rondas</h2>
-        <div class="actions">
-          <button class="ghost" data-export="golf">Exportar CSV</button>
-          <label class="ghost file">Importar CSV<input type="file" accept=".csv" data-import="golf" hidden></label>
-        </div>
-      </div>
-      <div class="table-wrap"><table id="golf-table"></table></div>
-    </section>
-  </main>
-
-  <footer class="foot">
-    Datos base: <code>data/natacion.csv</code> y <code>data/golf.csv</code>.
-    Lo que cargás desde el formulario se guarda en este navegador; usá “Exportar CSV” para pasarlo al repo.
-  </footer>
+  <div id="tip" class="tip" role="status" hidden></div>
 
   <script src="app.js"></script>
 </body>

@@ -1,0 +1,52 @@
+name: Sincronizar Garmin
+
+on:
+  schedule:
+    - cron: "17 9 * * *"   # todos los días 09:17 UTC (06:17 en Argentina)
+  workflow_dispatch:
+    inputs:
+      full_sync:
+        description: "Volver a descargar todo el historial"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-garmin
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Descargar actividades
+        env:
+          GARMINTOKENS: ${{ secrets.GARMINTOKENS }}
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          FULL_SYNC: ${{ inputs.full_sync && '1' || '0' }}
+        run: python scripts/sync_garmin.py
+
+      - name: Guardar cambios
+        run: |
+          git add data
+          if git diff --cached --quiet; then
+            echo "Sin actividades nuevas."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Sincronizar datos de Garmin ($(date -u +%Y-%m-%d))"
+          git push

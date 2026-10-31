@@ -1,0 +1,11 @@
+{
+  "objetivos": {
+    "natacion_km_semana": 10,
+    "golf_rondas_semana": 1
+  },
+  "proxima_carrera": {
+    "nombre": "",
+    "fecha": "",
+    "distancia_m": null
+  }
+}
