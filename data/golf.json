@@ -1,1 +1,1066 @@
-{"sample": true, "updated": "2026-10-31T16:26:17+00:00", "handicap": 18.4, "rounds": [{"id": 50000, "date": "2026-04-18", "time": "09:34", "course": "Club de ejemplo B", "holes_played": 18, "strokes": 87, "par": 72, "putts": 38, "fairways_hit": 7, "fairways_left": 1, "fairways_right": 6, "fairways_total": 14, "gir": 7, "gir_total": 18, "penalties": 2, "holes": [{"n": 1, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 1}, {"n": 3, "par": 3, "strokes": 5, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 6, "putts": 3, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 3, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 3, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 7, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 3, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 7, "putts": 2, "fairway": null, "penalties": 1}, {"n": 16, "par": 4, "strokes": 4, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 4, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 0}]}, {"id": 50001, "date": "2026-04-25", "time": "09:16", "course": "Club de ejemplo A", "holes_played": 18, "strokes": 90, "par": 72, "putts": 36, "fairways_hit": 6, "fairways_left": 1, "fairways_right": 7, "fairways_total": 14, "gir": 5, "gir_total": 18, "penalties": 1, "holes": [{"n": 1, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 7, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 3, "putts": 1, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 3, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 8, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 4, "putts": 3, "fairway": "RIGHT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 5, "putts": 2, "fairway": null, "penalties": 1}, {"n": 12, "par": 5, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 4, "putts": 1, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}]}, {"id": 50002, "date": "2026-05-02", "time": "09:09", "course": "Club de ejemplo A", "holes_played": 18, "strokes": 88, "par": 72, "putts": 36, "fairways_hit": 7, "fairways_left": 3, "fairways_right": 4, "fairways_total": 14, "gir": 6, "gir_total": 18, "penalties": 1, "holes": [{"n": 1, "par": 4, "strokes": 4, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 5, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 6, "putts": 1, "fairway": "RIGHT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 4, "putts": 3, "fairway": "LEFT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 4, "putts": 3, "fairway": null, "penalties": 1}, {"n": 12, "par": 5, "strokes": 7, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 5, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}]}, {"id": 50003, "date": "2026-05-16", "time": "09:19", "course": "Club de ejemplo A", "holes_played": 18, "strokes": 90, "par": 72, "putts": 38, "fairways_hit": 6, "fairways_left": 4, "fairways_right": 4, "fairways_total": 14, "gir": 5, "gir_total": 18, "penalties": 0, "holes": [{"n": 1, "par": 4, "strokes": 6, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 5, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 3, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 7, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 5, "putts": 3, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 5, "putts": 1, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 4, "putts": 3, "fairway": "RIGHT", "penalties": 0}]}, {"id": 50004, "date": "2026-05-23", "time": "09:24", "course": "Club de ejemplo B", "holes_played": 18, "strokes": 90, "par": 72, "putts": 38, "fairways_hit": 4, "fairways_left": 5, "fairways_right": 5, "fairways_total": 14, "gir": 8, "gir_total": 18, "penalties": 1, "holes": [{"n": 1, "par": 4, "strokes": 3, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 5, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 7, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 5, "putts": 3, "fairway": "LEFT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 4, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 6, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 7, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 6, "putts": 3, "fairway": "LEFT", "penalties": 1}]}, {"id": 50005, "date": "2026-05-30", "time": "09:06", "course": "Club de ejemplo B", "holes_played": 18, "strokes": 88, "par": 72, "putts": 37, "fairways_hit": 8, "fairways_left": 2, "fairways_right": 4, "fairways_total": 14, "gir": 7, "gir_total": 18, "penalties": 1, "holes": [{"n": 1, "par": 4, "strokes": 5, "putts": 3, "fairway": "LEFT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 3, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 4, "putts": 3, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 3, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 7, "putts": 1, "fairway": "RIGHT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 4, "putts": 1, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 4, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 7, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 5, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 1}, {"n": 17, "par": 5, "strokes": 5, "putts": 3, "fairway": "RIGHT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}]}, {"id": 50006, "date": "2026-06-13", "time": "09:07", "course": "Club de ejemplo B", "holes_played": 18, "strokes": 84, "par": 72, "putts": 36, "fairways_hit": 6, "fairways_left": 1, "fairways_right": 7, "fairways_total": 14, "gir": 7, "gir_total": 18, "penalties": 1, "holes": [{"n": 1, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 3, "putts": 1, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 3, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 3, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 5, "putts": 1, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 1}, {"n": 8, "par": 5, "strokes": 6, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 4, "putts": 3, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 4, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 4, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 6, "putts": 3, "fairway": "RIGHT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}]}, {"id": 50007, "date": "2026-06-20", "time": "09:10", "course": "Club de ejemplo B", "holes_played": 18, "strokes": 90, "par": 72, "putts": 37, "fairways_hit": 7, "fairways_left": 3, "fairways_right": 4, "fairways_total": 14, "gir": 7, "gir_total": 18, "penalties": 3, "holes": [{"n": 1, "par": 4, "strokes": 6, "putts": 1, "fairway": "RIGHT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 7, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 4, "putts": 3, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 1}, {"n": 6, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 4, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 4, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 6, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 1}, {"n": 13, "par": 4, "strokes": 5, "putts": 1, "fairway": "RIGHT", "penalties": 1}, {"n": 14, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 4, "putts": 3, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 5, "putts": 1, "fairway": "RIGHT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 6, "putts": 2, "fairway": "LEFT", "penalties": 0}]}, {"id": 50008, "date": "2026-06-27", "time": "09:21", "course": "Club de ejemplo A", "holes_played": 9, "strokes": 41, "par": 36, "putts": 15, "fairways_hit": 2, "fairways_left": 1, "fairways_right": 4, "fairways_total": 7, "gir": 5, "gir_total": 9, "penalties": 0, "holes": [{"n": 1, "par": 4, "strokes": 5, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 7, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 3, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 4, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 6, "putts": 1, "fairway": "RIGHT", "penalties": 0}]}, {"id": 50009, "date": "2026-07-04", "time": "09:27", "course": "Club de ejemplo B", "holes_played": 18, "strokes": 91, "par": 72, "putts": 32, "fairways_hit": 6, "fairways_left": 5, "fairways_right": 3, "fairways_total": 14, "gir": 3, "gir_total": 18, "penalties": 3, "holes": [{"n": 1, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 4, "putts": 1, "fairway": "HIT", "penalties": 1}, {"n": 5, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 1}, {"n": 7, "par": 4, "strokes": 7, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 7, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 1, "fairway": "RIGHT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 1}, {"n": 11, "par": 3, "strokes": 4, "putts": 1, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 6, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 5, "putts": 3, "fairway": "LEFT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 3, "putts": 1, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}]}, {"id": 50010, "date": "2026-07-25", "time": "09:50", "course": "Club de ejemplo A", "holes_played": 18, "strokes": 87, "par": 72, "putts": 38, "fairways_hit": 5, "fairways_left": 4, "fairways_right": 5, "fairways_total": 14, "gir": 6, "gir_total": 18, "penalties": 1, "holes": [{"n": 1, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 1}, {"n": 3, "par": 3, "strokes": 5, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 5, "putts": 1, "fairway": "RIGHT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 3, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 7, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 4, "putts": 3, "fairway": "LEFT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 4, "putts": 3, "fairway": "LEFT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}]}, {"id": 50011, "date": "2026-08-08", "time": "09:16", "course": "Club de ejemplo A", "holes_played": 18, "strokes": 85, "par": 72, "putts": 38, "fairways_hit": 7, "fairways_left": 5, "fairways_right": 2, "fairways_total": 14, "gir": 9, "gir_total": 18, "penalties": 1, "holes": [{"n": 1, "par": 4, "strokes": 4, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 6, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 4, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 6, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 1}, {"n": 12, "par": 5, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 3, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 4, "putts": 3, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 5, "putts": 3, "fairway": "LEFT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 6, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 6, "putts": 2, "fairway": "LEFT", "penalties": 0}]}, {"id": 50012, "date": "2026-08-15", "time": "09:15", "course": "Club de ejemplo A", "holes_played": 18, "strokes": 85, "par": 72, "putts": 38, "fairways_hit": 5, "fairways_left": 7, "fairways_right": 2, "fairways_total": 14, "gir": 9, "gir_total": 18, "penalties": 2, "holes": [{"n": 1, "par": 4, "strokes": 6, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 4, "putts": 2, "fairway": "LEFT", "penalties": 1}, {"n": 5, "par": 4, "strokes": 5, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 4, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 4, "putts": 2, "fairway": "LEFT", "penalties": 1}, {"n": 11, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 4, "putts": 3, "fairway": "RIGHT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 6, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 5, "putts": 3, "fairway": "RIGHT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 7, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 4, "putts": 3, "fairway": "LEFT", "penalties": 0}]}, {"id": 50013, "date": "2026-08-22", "time": "09:18", "course": "Club de ejemplo A", "holes_played": 18, "strokes": 86, "par": 72, "putts": 37, "fairways_hit": 6, "fairways_left": 3, "fairways_right": 5, "fairways_total": 14, "gir": 8, "gir_total": 18, "penalties": 1, "holes": [{"n": 1, "par": 4, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 7, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 4, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 7, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 4, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 6, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 4, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 6, "putts": 3, "fairway": "LEFT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 5, "putts": 1, "fairway": "RIGHT", "penalties": 1}]}, {"id": 50014, "date": "2026-08-29", "time": "09:03", "course": "Club de ejemplo A", "holes_played": 18, "strokes": 84, "par": 72, "putts": 37, "fairways_hit": 4, "fairways_left": 5, "fairways_right": 5, "fairways_total": 14, "gir": 10, "gir_total": 18, "penalties": 2, "holes": [{"n": 1, "par": 4, "strokes": 5, "putts": 3, "fairway": "RIGHT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 5, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 4, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 5, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 6, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 6, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 5, "putts": 3, "fairway": "RIGHT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 8, "putts": 2, "fairway": "HIT", "penalties": 1}, {"n": 13, "par": 4, "strokes": 5, "putts": 3, "fairway": "LEFT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 3, "putts": 2, "fairway": "LEFT", "penalties": 1}, {"n": 15, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 3, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 6, "putts": 3, "fairway": "RIGHT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 4, "putts": 3, "fairway": "LEFT", "penalties": 0}]}, {"id": 50015, "date": "2026-09-05", "time": "09:27", "course": "Club de ejemplo A", "holes_played": 18, "strokes": 84, "par": 72, "putts": 38, "fairways_hit": 4, "fairways_left": 4, "fairways_right": 6, "fairways_total": 14, "gir": 8, "gir_total": 18, "penalties": 2, "holes": [{"n": 1, "par": 4, "strokes": 4, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 4, "putts": 3, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 4, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 6, "putts": 3, "fairway": "RIGHT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 4, "putts": 2, "fairway": "RIGHT", "penalties": 1}, {"n": 11, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 6, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 5, "putts": 3, "fairway": "LEFT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 1}, {"n": 15, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}]}, {"id": 50016, "date": "2026-09-12", "time": "09:28", "course": "Club de ejemplo B", "holes_played": 9, "strokes": 46, "par": 36, "putts": 18, "fairways_hit": 4, "fairways_left": 0, "fairways_right": 3, "fairways_total": 7, "gir": 1, "gir_total": 9, "penalties": 0, "holes": [{"n": 1, "par": 4, "strokes": 6, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 5, "putts": 1, "fairway": "RIGHT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 5, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 3, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 7, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}]}, {"id": 50017, "date": "2026-09-19", "time": "09:00", "course": "Club de ejemplo B", "holes_played": 18, "strokes": 85, "par": 72, "putts": 36, "fairways_hit": 5, "fairways_left": 6, "fairways_right": 3, "fairways_total": 14, "gir": 9, "gir_total": 18, "penalties": 0, "holes": [{"n": 1, "par": 4, "strokes": 4, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 4, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 6, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 4, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 5, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 5, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 4, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 6, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 7, "putts": 2, "fairway": "RIGHT", "penalties": 0}]}, {"id": 50018, "date": "2026-10-10", "time": "09:49", "course": "Club de ejemplo A", "holes_played": 18, "strokes": 85, "par": 72, "putts": 33, "fairways_hit": 6, "fairways_left": 6, "fairways_right": 2, "fairways_total": 14, "gir": 6, "gir_total": 18, "penalties": 1, "holes": [{"n": 1, "par": 4, "strokes": 4, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 5, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 5, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 5, "putts": 1, "fairway": "LEFT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 7, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 4, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 1}, {"n": 11, "par": 3, "strokes": 5, "putts": 1, "fairway": null, "penalties": 0}, {"n": 12, "par": 5, "strokes": 6, "putts": 1, "fairway": "RIGHT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 4, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 4, "putts": 3, "fairway": "HIT", "penalties": 0}]}, {"id": 50019, "date": "2026-10-24", "time": "09:04", "course": "Club de ejemplo A", "holes_played": 9, "strokes": 38, "par": 36, "putts": 20, "fairways_hit": 4, "fairways_left": 1, "fairways_right": 2, "fairways_total": 7, "gir": 7, "gir_total": 9, "penalties": 3, "holes": [{"n": 1, "par": 4, "strokes": 4, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 1}, {"n": 4, "par": 4, "strokes": 4, "putts": 3, "fairway": "RIGHT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 1}, {"n": 6, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 4, "putts": 2, "fairway": "HIT", "penalties": 1}, {"n": 8, "par": 5, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 2, "fairway": "LEFT", "penalties": 0}]}, {"id": 50020, "date": "2026-10-31", "time": "09:47", "course": "Club de ejemplo B", "holes_played": 18, "strokes": 91, "par": 72, "putts": 34, "fairways_hit": 6, "fairways_left": 2, "fairways_right": 6, "fairways_total": 14, "gir": 6, "gir_total": 18, "penalties": 1, "holes": [{"n": 1, "par": 4, "strokes": 6, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 2, "par": 5, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 3, "par": 3, "strokes": 4, "putts": 2, "fairway": null, "penalties": 0}, {"n": 4, "par": 4, "strokes": 6, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 5, "par": 4, "strokes": 8, "putts": 1, "fairway": "HIT", "penalties": 0}, {"n": 6, "par": 3, "strokes": 2, "putts": 1, "fairway": null, "penalties": 0}, {"n": 7, "par": 4, "strokes": 6, "putts": 2, "fairway": "LEFT", "penalties": 0}, {"n": 8, "par": 5, "strokes": 5, "putts": 3, "fairway": "LEFT", "penalties": 0}, {"n": 9, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 10, "par": 4, "strokes": 5, "putts": 2, "fairway": "HIT", "penalties": 0}, {"n": 11, "par": 3, "strokes": 5, "putts": 2, "fairway": null, "penalties": 1}, {"n": 12, "par": 5, "strokes": 5, "putts": 3, "fairway": "HIT", "penalties": 0}, {"n": 13, "par": 4, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 14, "par": 4, "strokes": 7, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 15, "par": 3, "strokes": 3, "putts": 2, "fairway": null, "penalties": 0}, {"n": 16, "par": 4, "strokes": 5, "putts": 1, "fairway": "RIGHT", "penalties": 0}, {"n": 17, "par": 5, "strokes": 5, "putts": 2, "fairway": "RIGHT", "penalties": 0}, {"n": 18, "par": 4, "strokes": 3, "putts": 2, "fairway": "HIT", "penalties": 0}]}]}
+{
+ "updated": "2026-10-31T16:44:57+00:00",
+ "handicap": 29.2,
+ "rounds": [
+  {
+   "id": 355068955,
+   "date": "2026-04-03",
+   "time": "12:39",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 9,
+   "strokes": 64,
+   "par": null,
+   "putts": null,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 0,
+   "holes": [
+    {
+     "n": 1,
+     "par": null,
+     "strokes": 8,
+     "putts": null,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 2,
+     "par": null,
+     "strokes": 6,
+     "putts": null,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 3,
+     "par": null,
+     "strokes": 5,
+     "putts": null,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 4,
+     "par": null,
+     "strokes": 7,
+     "putts": null,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 5,
+     "par": null,
+     "strokes": 7,
+     "putts": null,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 6,
+     "par": null,
+     "strokes": 7,
+     "putts": null,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 7,
+     "par": null,
+     "strokes": 6,
+     "putts": null,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 8,
+     "par": null,
+     "strokes": 12,
+     "putts": null,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 9,
+     "par": null,
+     "strokes": 6,
+     "putts": null,
+     "fairway": "HIT",
+     "penalties": 0
+    }
+   ]
+  },
+  {
+   "id": 356427181,
+   "date": "2026-04-12",
+   "time": "12:13",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 9,
+   "strokes": 62,
+   "par": null,
+   "putts": 19,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 6,
+   "holes": [
+    {
+     "n": 10,
+     "par": null,
+     "strokes": 8,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 11,
+     "par": null,
+     "strokes": 7,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 12,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 1
+    },
+    {
+     "n": 13,
+     "par": null,
+     "strokes": 7,
+     "putts": 3,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 14,
+     "par": null,
+     "strokes": 8,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 2
+    },
+    {
+     "n": 15,
+     "par": null,
+     "strokes": 9,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 2
+    },
+    {
+     "n": 16,
+     "par": null,
+     "strokes": 3,
+     "putts": 1,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 17,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 18,
+     "par": null,
+     "strokes": 8,
+     "putts": 3,
+     "fairway": "LEFT",
+     "penalties": 1
+    }
+   ]
+  },
+  {
+   "id": 357486511,
+   "date": "2026-04-19",
+   "time": "12:57",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 9,
+   "strokes": 60,
+   "par": null,
+   "putts": 21,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 0,
+   "holes": [
+    {
+     "n": 1,
+     "par": null,
+     "strokes": 7,
+     "putts": 3,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 2,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 3,
+     "par": null,
+     "strokes": 6,
+     "putts": 3,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 4,
+     "par": null,
+     "strokes": 7,
+     "putts": 3,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 5,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 6,
+     "par": null,
+     "strokes": 8,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 7,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 8,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 9,
+     "par": null,
+     "strokes": 9,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    }
+   ]
+  },
+  {
+   "id": 358965100,
+   "date": "2026-04-28",
+   "time": "20:28",
+   "course": "Potrerillo De Larreta Country Club",
+   "holes_played": 8,
+   "strokes": 51,
+   "par": null,
+   "putts": 17,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 0,
+   "holes": [
+    {
+     "n": 1,
+     "par": null,
+     "strokes": 7,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 2,
+     "par": null,
+     "strokes": 9,
+     "putts": 3,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 3,
+     "par": null,
+     "strokes": 5,
+     "putts": 3,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 4,
+     "par": null,
+     "strokes": 8,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 5,
+     "par": null,
+     "strokes": 7,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 6,
+     "par": null,
+     "strokes": 4,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 7,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 8,
+     "par": null,
+     "strokes": 6,
+     "putts": 1,
+     "fairway": "HIT",
+     "penalties": 0
+    }
+   ]
+  },
+  {
+   "id": 359892769,
+   "date": "2026-05-03",
+   "time": "19:06",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 9,
+   "strokes": 55,
+   "par": null,
+   "putts": 19,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 2,
+   "holes": [
+    {
+     "n": 1,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 2,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 1
+    },
+    {
+     "n": 3,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 4,
+     "par": null,
+     "strokes": 4,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 5,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 6,
+     "par": null,
+     "strokes": 10,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 1
+    },
+    {
+     "n": 7,
+     "par": null,
+     "strokes": 5,
+     "putts": 3,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 8,
+     "par": null,
+     "strokes": 8,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 9,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    }
+   ]
+  },
+  {
+   "id": 360218741,
+   "date": "2026-05-05",
+   "time": "20:09",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 7,
+   "strokes": 44,
+   "par": null,
+   "putts": 19,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 4,
+   "holes": [
+    {
+     "n": 10,
+     "par": null,
+     "strokes": 6,
+     "putts": 3,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 11,
+     "par": null,
+     "strokes": 7,
+     "putts": 3,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 12,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 2
+    },
+    {
+     "n": 13,
+     "par": null,
+     "strokes": 7,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 1
+    },
+    {
+     "n": 16,
+     "par": null,
+     "strokes": 6,
+     "putts": 3,
+     "fairway": null,
+     "penalties": 1
+    },
+    {
+     "n": 17,
+     "par": null,
+     "strokes": 8,
+     "putts": 3,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 18,
+     "par": null,
+     "strokes": 5,
+     "putts": 3,
+     "fairway": "LEFT",
+     "penalties": 0
+    }
+   ]
+  },
+  {
+   "id": 363474590,
+   "date": "2026-05-24",
+   "time": "13:23",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 9,
+   "strokes": 60,
+   "par": null,
+   "putts": 19,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 3,
+   "holes": [
+    {
+     "n": 1,
+     "par": null,
+     "strokes": 7,
+     "putts": 1,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 2,
+     "par": null,
+     "strokes": 9,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 2
+    },
+    {
+     "n": 3,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 4,
+     "par": null,
+     "strokes": 7,
+     "putts": 4,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 5,
+     "par": null,
+     "strokes": 6,
+     "putts": 1,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 6,
+     "par": null,
+     "strokes": 6,
+     "putts": 3,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 7,
+     "par": null,
+     "strokes": 4,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 8,
+     "par": null,
+     "strokes": 9,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 9,
+     "par": null,
+     "strokes": 7,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 1
+    }
+   ]
+  },
+  {
+   "id": 378797123,
+   "date": "2026-08-17",
+   "time": "12:25",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 9,
+   "strokes": 64,
+   "par": null,
+   "putts": 20,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 0,
+   "holes": [
+    {
+     "n": 1,
+     "par": null,
+     "strokes": 10,
+     "putts": 3,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 2,
+     "par": null,
+     "strokes": 7,
+     "putts": 1,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 3,
+     "par": null,
+     "strokes": 8,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 4,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 5,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 6,
+     "par": null,
+     "strokes": 7,
+     "putts": 3,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 7,
+     "par": null,
+     "strokes": 7,
+     "putts": 3,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 8,
+     "par": null,
+     "strokes": 7,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 9,
+     "par": null,
+     "strokes": 7,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    }
+   ]
+  },
+  {
+   "id": 381197486,
+   "date": "2026-08-30",
+   "time": "19:23",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 9,
+   "strokes": 55,
+   "par": null,
+   "putts": 22,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 1,
+   "holes": [
+    {
+     "n": 1,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 2,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 3,
+     "par": null,
+     "strokes": 5,
+     "putts": 3,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 4,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 5,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 1
+    },
+    {
+     "n": 6,
+     "par": null,
+     "strokes": 7,
+     "putts": 3,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 7,
+     "par": null,
+     "strokes": 5,
+     "putts": 3,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 8,
+     "par": null,
+     "strokes": 9,
+     "putts": 3,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 9,
+     "par": null,
+     "strokes": 7,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    }
+   ]
+  },
+  {
+   "id": 382691284,
+   "date": "2026-09-08",
+   "time": "19:21",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 8,
+   "strokes": 47,
+   "par": null,
+   "putts": 21,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 0,
+   "holes": [
+    {
+     "n": 10,
+     "par": null,
+     "strokes": 4,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 11,
+     "par": null,
+     "strokes": 7,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 12,
+     "par": null,
+     "strokes": 5,
+     "putts": 3,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 14,
+     "par": null,
+     "strokes": 6,
+     "putts": 3,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 15,
+     "par": null,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 16,
+     "par": null,
+     "strokes": 4,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 17,
+     "par": null,
+     "strokes": 8,
+     "putts": 4,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 18,
+     "par": null,
+     "strokes": 7,
+     "putts": 3,
+     "fairway": "LEFT",
+     "penalties": 0
+    }
+   ]
+  },
+  {
+   "id": 386786907,
+   "date": "2026-10-04",
+   "time": "12:07",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 9,
+   "strokes": 38,
+   "par": null,
+   "putts": 17,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 0,
+   "holes": [
+    {
+     "n": 1,
+     "par": null,
+     "strokes": 4,
+     "putts": 1,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 2,
+     "par": null,
+     "strokes": 4,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 3,
+     "par": null,
+     "strokes": 4,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 4,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 5,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 6,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 7,
+     "par": null,
+     "strokes": 3,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 8,
+     "par": null,
+     "strokes": 4,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 9,
+     "par": null,
+     "strokes": 4,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    }
+   ]
+  },
+  {
+   "id": 389600409,
+   "date": "2026-10-25",
+   "time": "12:52",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 9,
+   "strokes": 58,
+   "par": null,
+   "putts": 23,
+   "fairways_hit": 0,
+   "fairways_left": 0,
+   "fairways_right": 0,
+   "fairways_total": 0,
+   "gir": null,
+   "gir_total": 0,
+   "penalties": 1,
+   "holes": [
+    {
+     "n": 1,
+     "par": null,
+     "strokes": 6,
+     "putts": 3,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 2,
+     "par": null,
+     "strokes": 8,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 1
+    },
+    {
+     "n": 3,
+     "par": null,
+     "strokes": 6,
+     "putts": 3,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 4,
+     "par": null,
+     "strokes": 8,
+     "putts": 4,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 5,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 6,
+     "par": null,
+     "strokes": 6,
+     "putts": 3,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 7,
+     "par": null,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 8,
+     "par": null,
+     "strokes": 6,
+     "putts": 1,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 9,
+     "par": null,
+     "strokes": 8,
+     "putts": 3,
+     "fairway": "LEFT",
+     "penalties": 0
+    }
+   ]
+  }
+ ]
+}
