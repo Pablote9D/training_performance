@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-31T16:44:51+00:00",
+ "updated": "2026-10-31T16:48:42+00:00",
  "sessions": [
   {
    "id": 22433269500,
@@ -16,7 +16,7 @@
    "swolf": 37,
    "strokes": 676,
    "lengths": 75,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     616,
     572,
@@ -45,7 +45,7 @@
    "swolf": 40,
    "strokes": 962,
    "lengths": 85,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     291,
     715,
@@ -74,7 +74,7 @@
    "swolf": 38,
    "strokes": 772,
    "lengths": 71,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     383,
     711,
@@ -104,7 +104,7 @@
    "swolf": 37,
    "strokes": 724,
    "lengths": 68,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     351,
     771,
@@ -135,7 +135,7 @@
    "swolf": 37,
    "strokes": 957,
    "lengths": 96,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     121,
     636,
@@ -165,7 +165,7 @@
    "swolf": 34,
    "strokes": 821,
    "lengths": 87,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     673,
     663,
@@ -196,7 +196,7 @@
    "swolf": 43,
    "strokes": 653,
    "lengths": 84,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     268,
     563,
@@ -226,7 +226,7 @@
    "swolf": 36,
    "strokes": 630,
    "lengths": 62,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     170,
     640,
@@ -254,7 +254,7 @@
    "swolf": 39,
    "strokes": 534,
    "lengths": 68,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     362,
     649,
@@ -283,7 +283,7 @@
    "swolf": 39,
    "strokes": 942,
    "lengths": 85,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     342,
     719,
@@ -313,7 +313,7 @@
    "swolf": 40,
    "strokes": 795,
    "lengths": 80,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     466,
     795,
@@ -343,7 +343,7 @@
    "swolf": 40,
    "strokes": 523,
    "lengths": 71,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     512,
     564,
@@ -373,7 +373,7 @@
    "swolf": 37,
    "strokes": 538,
    "lengths": 73,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     698,
     1052,
@@ -402,7 +402,7 @@
    "swolf": 78,
    "strokes": 754,
    "lengths": 86,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     547,
     692,
@@ -432,7 +432,7 @@
    "swolf": 36,
    "strokes": 743,
    "lengths": 86,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     584,
     714,
@@ -462,7 +462,7 @@
    "swolf": 35,
    "strokes": 367,
    "lengths": 48,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     838,
     1523,
@@ -491,7 +491,7 @@
    "swolf": 37,
    "strokes": 553,
    "lengths": 70,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     955,
     1360,
@@ -521,7 +521,7 @@
    "swolf": 38,
    "strokes": 767,
    "lengths": 81,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     278,
     855,
@@ -551,7 +551,7 @@
    "swolf": 38,
    "strokes": 808,
    "lengths": 89,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     189,
     841,
@@ -582,7 +582,7 @@
    "swolf": 36,
    "strokes": 774,
    "lengths": 86,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     178,
     612,
@@ -612,7 +612,7 @@
    "swolf": 36,
    "strokes": 935,
    "lengths": 93,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     125,
     777,
@@ -642,7 +642,7 @@
    "swolf": 38,
    "strokes": 728,
    "lengths": 74,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     469,
     650,
@@ -671,7 +671,7 @@
    "swolf": 38,
    "strokes": 624,
    "lengths": 76,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     406,
     874,
@@ -701,7 +701,7 @@
    "swolf": 39,
    "strokes": 533,
    "lengths": 80,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     664,
     1260,
@@ -731,7 +731,7 @@
    "swolf": 39,
    "strokes": 328,
    "lengths": 81,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     223,
     1168,
@@ -761,7 +761,7 @@
    "swolf": 40,
    "strokes": 716,
    "lengths": 84,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     96,
     588,
@@ -790,7 +790,7 @@
    "swolf": 41,
    "strokes": 658,
    "lengths": 86,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     89,
     529,
@@ -820,7 +820,7 @@
    "swolf": 39,
    "strokes": 487,
    "lengths": 83,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     354,
     1302,
@@ -850,7 +850,7 @@
    "swolf": 36,
    "strokes": 784,
    "lengths": 78,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     120,
     631,
@@ -879,7 +879,7 @@
    "swolf": 37,
    "strokes": 741,
    "lengths": 82,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     269,
     499,
@@ -909,7 +909,7 @@
    "swolf": 42,
    "strokes": 717,
    "lengths": 70,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     589,
     695,
@@ -938,7 +938,7 @@
    "swolf": 36,
    "strokes": 675,
    "lengths": 69,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     393,
     442,
@@ -967,7 +967,7 @@
    "swolf": 36,
    "strokes": 906,
    "lengths": 92,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     527,
     682,
@@ -997,7 +997,7 @@
    "swolf": 36,
    "strokes": 815,
    "lengths": 79,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     291,
     519,
@@ -1026,7 +1026,7 @@
    "swolf": 38,
    "strokes": 22,
    "lengths": 14,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     259,
     166,
@@ -1052,7 +1052,7 @@
    "swolf": 38,
    "strokes": 760,
    "lengths": 79,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     177,
     1073,
@@ -1082,7 +1082,7 @@
    "swolf": 36,
    "strokes": 768,
    "lengths": 83,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     404,
     738,
@@ -1111,7 +1111,7 @@
    "swolf": 33,
    "strokes": 907,
    "lengths": 95,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     275,
     438,
@@ -1140,7 +1140,7 @@
    "swolf": 38,
    "strokes": 730,
    "lengths": 84,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     144,
     963,
@@ -1169,7 +1169,7 @@
    "swolf": 37,
    "strokes": 825,
    "lengths": 88,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     142,
     810,
@@ -1199,7 +1199,7 @@
    "swolf": 36,
    "strokes": 589,
    "lengths": 76,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     393,
     965,
@@ -1229,7 +1229,7 @@
    "swolf": 37,
    "strokes": 642,
    "lengths": 81,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     482,
     1240,
@@ -1258,7 +1258,7 @@
    "swolf": 36,
    "strokes": 727,
    "lengths": 72,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     868,
     768,
@@ -1287,7 +1287,7 @@
    "swolf": 37,
    "strokes": 769,
    "lengths": 84,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     191,
     1009,
@@ -1317,7 +1317,7 @@
    "swolf": 38,
    "strokes": 530,
    "lengths": 76,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     678,
     1422,
@@ -1346,7 +1346,7 @@
    "swolf": 36,
    "strokes": 695,
    "lengths": 76,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     469,
     712,
@@ -1376,7 +1376,7 @@
    "swolf": 34,
    "strokes": 649,
    "lengths": 93,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     281,
     819,
@@ -1406,7 +1406,7 @@
    "swolf": 40,
    "strokes": 623,
    "lengths": 72,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     307,
     1059,
@@ -1436,7 +1436,7 @@
    "swolf": 35,
    "strokes": 809,
    "lengths": 105,
-   "pool_m": 2500.0,
+   "pool_m": 25.0,
    "hr_zones": [
     497,
     823,
