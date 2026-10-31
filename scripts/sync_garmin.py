@@ -68,6 +68,11 @@ def num(v: Any, nd: int | None = None) -> float | int | None:
     return round(f, nd) if nd is not None else f
 
 
+def swolf(d: dict[str, Any]) -> int | None:
+    v = num(first(d, "averageSWOLF", "averageSwolf", "swolf"), 0)
+    return v or None  # 0 = sin dato (descansos, técnica, patada)
+
+
 def first(d: dict[str, Any], *keys: str) -> Any:
     for k in keys:
         if d.get(k) is not None:
@@ -112,6 +117,8 @@ def parse_swim(api: Garmin, a: dict[str, Any]) -> dict[str, Any]:
     env = SWIM_TYPES[a["activityType"]["typeKey"]]
     date, hour = split_local(a.get("startTimeLocal"))
     pool = num(a.get("poolLength"), 1)
+    if pool and pool > 200:  # Garmin lo informa en centímetros (2500 = 25 m)
+        pool = round(pool / 100, 1)
     if pool and (a.get("unitOfPoolLength") or {}).get("unitKey") == "yard":
         pool = round(pool * 0.9144, 1)
 
@@ -127,7 +134,7 @@ def parse_swim(api: Garmin, a: dict[str, Any]) -> dict[str, Any]:
         "avg_hr": num(a.get("averageHR"), 0),
         "max_hr": num(a.get("maxHR"), 0),
         "calories": num(a.get("calories"), 0),
-        "swolf": num(first(a, "averageSwolf", "averageSWOLF"), 0),
+        "swolf": swolf(a),
         "strokes": num(first(a, "totalNumberOfStrokes", "strokes"), 0),
         "lengths": num(a.get("activeLengths"), 0),
         "pool_m": pool if env == "pool" else None,
@@ -157,7 +164,7 @@ def parse_swim(api: Garmin, a: dict[str, Any]) -> dict[str, Any]:
                 lengths.append({
                     "d": ld,
                     "t": num(first(ln, "duration", "elapsedDuration"), 1),
-                    "swolf": num(first(ln, "averageSWOLF", "averageSwolf", "swolf"), 0),
+                    "swolf": swolf(ln),
                     "stroke": stroke_name(first(ln, "swimStroke", "swimStrokeType")),
                 })
             strokes_used = {ln["stroke"] for ln in lengths if ln["stroke"]}
@@ -168,7 +175,7 @@ def parse_swim(api: Garmin, a: dict[str, Any]) -> dict[str, Any]:
                 "kind": "active" if dist > 0 else "rest",
                 "distance_m": dist,
                 "duration_s": dur,
-                "swolf": num(first(lap, "averageSWOLF", "averageSwolf"), 0),
+                "swolf": swolf(lap),
                 "avg_hr": num(lap.get("averageHR"), 0),
                 "stroke": stroke,
                 "lengths": lengths,
@@ -218,23 +225,49 @@ def sync_swims(api: Garmin, full: bool) -> int:
 
 
 # ───────── golf ─────────
-def hole_pars(detail: dict[str, Any], scorecard: dict[str, Any]) -> dict[int, int]:
+def _walk(obj: Any):
+    """Recorre recursivamente dicts y listas devolviendo (clave, valor)."""
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            yield k, v
+            yield from _walk(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _walk(v)
+
+
+def _shape(obj: Any, depth: int = 0) -> Any:
+    """Solo la estructura (claves y tipos, sin valores) para diagnosticar."""
+    if depth > 3:
+        return "…"
+    if isinstance(obj, dict):
+        return {k: _shape(v, depth + 1) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_shape(obj[0], depth + 1)] if obj else []
+    return type(obj).__name__
+
+
+def hole_pars(raw: Any) -> dict[int, int]:
+    """Par de cada hoyo, buscado en cualquier parte de la respuesta del scorecard."""
+    for k, v in _walk(raw):
+        if k == "holePars":
+            if isinstance(v, str) and v.isdigit():
+                return {i + 1: int(c) for i, c in enumerate(v)}
+            if isinstance(v, list) and v and all(isinstance(x, (int, float, str)) for x in v):
+                return {i + 1: int(x) for i, x in enumerate(v) if str(x).isdigit() and int(x)}
     pars: dict[int, int] = {}
-    for snap in detail.get("courseSnapshots") or []:
-        raw = snap.get("holePars")
-        if isinstance(raw, str) and raw.isdigit():
-            pars = {i + 1: int(c) for i, c in enumerate(raw)}
-        elif isinstance(raw, list):
-            pars = {i + 1: int(p) for i, p in enumerate(raw) if p}
-        for h in snap.get("holes") or []:
-            if h.get("number") and h.get("par"):
-                pars[int(h["number"])] = int(h["par"])
-        if pars:
-            break
-    for h in scorecard.get("holes") or []:
-        if h.get("par") and h.get("number"):
-            pars.setdefault(int(h["number"]), int(h["par"]))
+    for _, v in _walk(raw):
+        if isinstance(v, list) and v and isinstance(v[0], dict) and "par" in v[0]:
+            for h in v:
+                n = h.get("number") or h.get("holeNumber")
+                if n and h.get("par"):
+                    pars[int(n)] = int(h["par"])
+            if pars:
+                return pars
     return pars
+
+
+_shape_printed = False
 
 
 def parse_round(api: Garmin, summary: dict[str, Any]) -> dict[str, Any] | None:
@@ -243,7 +276,12 @@ def parse_round(api: Garmin, summary: dict[str, Any]) -> dict[str, Any] | None:
     details = raw.get("scorecardDetails") or [raw]
     detail = details[0] if details else {}
     sc = detail.get("scorecard") or detail
-    pars = hole_pars(detail, sc)
+    pars = hole_pars(raw)
+    global _shape_printed
+    if not pars and not _shape_printed:
+        print("  aviso: no se encontró el par de los hoyos. Estructura de la respuesta:")
+        print("  " + json.dumps(_shape(raw), ensure_ascii=False)[:3000])
+        _shape_printed = True
 
     holes = []
     for h in sorted(sc.get("holes") or [], key=lambda x: x.get("number", 0)):
@@ -263,7 +301,7 @@ def parse_round(api: Garmin, summary: dict[str, Any]) -> dict[str, Any] | None:
         return None
 
     played_pars = [h["par"] for h in holes if h["par"]]
-    fw_holes = [h for h in holes if h["par"] and h["par"] >= 4 and h["fairway"]]
+    fw_holes = [h for h in holes if h["fairway"] in ("HIT", "LEFT", "RIGHT") and (h["par"] or 4) >= 4]
     gir = [h for h in holes if h["par"] and h["putts"] is not None]
     date, hour = split_local(first(sc, "startTime", "formattedStartTime") or summary.get("startTime"))
     return {
@@ -288,7 +326,8 @@ def parse_round(api: Garmin, summary: dict[str, Any]) -> dict[str, Any] | None:
 
 def sync_golf(api: Garmin, full: bool) -> int:
     data = load(GOLF_FILE, "rounds")
-    rounds = {r["id"]: r for r in data.get("rounds", [])} if not full else {}
+    # las rondas sin par se vuelven a leer (versiones anteriores del script no lo encontraban)
+    rounds = {r["id"]: r for r in data.get("rounds", []) if r.get("par")} if not full else {}
 
     summaries: list[dict[str, Any]] = []
     start = 0

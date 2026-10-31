@@ -27,6 +27,7 @@
     env: store.get('tp:env', 'pool'),
     per: store.get('tp:per', '3M'),
     golfPer: store.get('tp:golfPer', '3M'),
+    golfHoles: store.get('tp:golfHoles', null),
     shown: 10,
   };
   let afterRender = [];
@@ -87,9 +88,17 @@
   }
 
   // ───────── golf: cálculos ─────────
-  const full18 = (r) => r.holes_played === 18 && r.strokes;
+  /** Rondas comparables: las de 9 o de 18 hoyos completos, según lo que se elija. */
+  const roundTypes = () => [9, 18].filter((n) => S.golf.rounds.some((r) => r.holes_played === n));
+  function holesType() {
+    const types = roundTypes();
+    if (types.includes(S.golfHoles)) return S.golfHoles;
+    const count = (n) => S.golf.rounds.filter((r) => r.holes_played === n).length;
+    return types.sort((a, b) => count(b) - count(a))[0] || 18;
+  }
+  const fullRound = (r) => r.holes_played === holesType() && r.strokes;
   function golfAgg(rows) {
-    const f = rows.filter(full18);
+    const f = rows.filter(fullRound);
     const avg = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
     const fwT = rows.reduce((a, r) => a + (r.fairways_total || 0), 0);
     const girT = rows.reduce((a, r) => a + (r.gir == null ? 0 : r.gir_total || r.holes_played || 0), 0);
@@ -99,7 +108,7 @@
       n: rows.length,
       avg: avg(f.map((r) => r.strokes)),
       best,
-      putts: putted.length ? (18 * putted.reduce((a, r) => a + r.putts, 0)) / putted.reduce((a, r) => a + r.holes_played, 0) : null,
+      putts: putted.length ? (holesType() * putted.reduce((a, r) => a + r.putts, 0)) / putted.reduce((a, r) => a + r.holes_played, 0) : null,
       fw: fwT ? (100 * rows.reduce((a, r) => a + (r.fairways_hit || 0), 0)) / fwT : null,
       gir: girT ? (100 * rows.reduce((a, r) => a + (r.gir || 0), 0)) / girT : null,
     };
@@ -224,10 +233,10 @@
     const rounds = S.golf.rounds.filter((r) => parseD(r.date) >= ws).length;
     const a = swimAgg(thisW), b = swimAgg(lastW);
 
-    const recentFull = S.golf.rounds.filter(full18).slice(-5);
+    const recentFull = S.golf.rounds.filter(fullRound).slice(-5);
     const golfCard = S.golf.handicap != null
       ? kpi('Índice hándicap', nf(S.golf.handicap, 1), '', '<div class="sub">según Garmin</div>')
-      : kpi('Promedio últimas 5', recentFull.length ? nf(golfAgg(recentFull).avg, 1) : '—', 'golpes', '<div class="sub">rondas de 18 hoyos</div>');
+      : kpi('Promedio últimas 5', recentFull.length ? nf(golfAgg(recentFull).avg, 1) : '—', 'golpes', `<div class="sub">rondas de ${holesType()} hoyos</div>`);
 
     const latest = [
       ...S.swim.sessions.slice(-4).map((s) => ({ k: `${s.date} ${s.time}`, html: swimRow(s) })),
@@ -400,8 +409,10 @@
     let lapsHtml = '';
     const all = intervals.flatMap((it) => it.lengths || []).filter((l) => l.t && l.d);
     if (all.length) {
-      const speeds = all.map((l) => l.d / l.t);
-      const lo = Math.min(...speeds) * 0.85, hi = Math.max(...speeds);
+      // escala por percentiles: unas pocas piletas mal detectadas por el reloj no aplastan el resto
+      const speeds = all.map((l) => l.d / l.t).sort((x, y) => x - y);
+      const q = (f) => speeds[Math.min(speeds.length - 1, Math.floor(f * speeds.length))];
+      const lo = q(0.03) * 0.85, hi = q(0.97);
       let k = 0, act = 0;
       const items = [];
       for (const it of intervals) {
@@ -411,7 +422,7 @@
           if (!l.t || !l.d) continue;
           k++;
           const tip = [`Pileta ${k}`, `${clock(l.t)} · ${clock(pace(l.t, l.d))} /100m`, [l.swolf ? `SWOLF ${l.swolf}` : '', l.stroke || ''].filter(Boolean).join(' · ')].filter(Boolean).join('\n');
-          items.push({ v: 1, h: 8 + (92 * (l.d / l.t - lo)) / (hi - lo || 1), cls, tip });
+          items.push({ v: 1, h: Math.max(4, Math.min(100, 8 + (92 * (l.d / l.t - lo)) / (hi - lo || 1))), cls, tip });
         }
       }
       lapsHtml = `<section class="card wide">
@@ -493,16 +504,16 @@
 
     const kpis = [
       kpi('Hándicap', S.golf.handicap != null ? nf(S.golf.handicap, 1) : '—', '', '<div class="sub">según Garmin</div>'),
-      kpi('Promedio', a.avg ? nf(a.avg, 1) : '—', '', d(a.avg, b.avg, (v) => nf(v, 1), 'down') || '<div class="sub">18 hoyos</div>'),
+      kpi('Promedio', a.avg ? nf(a.avg, 1) : '—', '', d(a.avg, b.avg, (v) => nf(v, 1), 'down') || `<div class="sub">rondas de ${holesType()}</div>`),
       kpi('Mejor', a.best ? a.best.strokes : '—', '', a.best ? `<div class="sub">${a.best.par ? vsPar(a.best.strokes - a.best.par) + ' · ' : ''}${shortDate(a.best.date)}</div>` : ''),
-      kpi('Putts', a.putts ? nf(a.putts, 1) : '—', '', d(a.putts, b.putts, (v) => nf(v, 1), 'down') || '<div class="sub">por 18 hoyos</div>'),
+      kpi('Putts', a.putts ? nf(a.putts, 1) : '—', '', d(a.putts, b.putts, (v) => nf(v, 1), 'down') || `<div class="sub">por ronda de ${holesType()}</div>`),
       kpi('Fairways', a.fw != null ? `${nf(a.fw)}%` : '—', '', d(a.fw, b.fw, (v) => `${nf(v)} pts`, 'up') || '<div class="sub">acertados</div>'),
       kpi('GIR', a.gir != null ? `${nf(a.gir)}%` : '—', '', d(a.gir, b.gir, (v) => `${nf(v)} pts`, 'up') || '<div class="sub">en regulación</div>'),
     ].join('');
 
-    const f = cur.filter(full18);
+    const f = cur.filter(fullRound);
     const scoreSpark = spark(f.map((r) => ({ v: r.strokes, label: `${shortDate(r.date)} · ${r.course}` })),
-      { color: 'var(--golf)', fmt: (v) => `${v} golpes`, height: 110, label: 'Golpes por ronda de 18 hoyos' });
+      { color: 'var(--golf)', fmt: (v) => `${v} golpes`, height: 110, label: `Golpes por ronda de ${holesType()} hoyos` });
 
     // golpes por tipo de hoyo y salida
     const byPar = { 3: [], 4: [], 5: [] };
@@ -529,11 +540,13 @@
     return `
       <header class="head"><h1 class="title">Golf</h1></header>
       ${sampleBanner()}
+      ${roundTypes().length > 1 ? `<div class="segmented" role="group" aria-label="Tipo de ronda">${roundTypes().map((n) =>
+        `<button type="button" data-act="golfHoles" data-val="${n}" aria-pressed="${n === holesType()}">${n} hoyos</button>`).join('')}</div>` : ''}
       ${pills('golf', S.golfPer, 'golfPer')}
       <section class="cols-3 kpis golf">${kpis}</section>
       <div class="split">
         <section class="card wide">
-          <div class="card-head"><h2 class="card-title">Golpes por ronda</h2><span class="hint">18 hoyos · menor es mejor</span></div>
+          <div class="card-head"><h2 class="card-title">Golpes por ronda</h2><span class="hint">${holesType()} hoyos · menor es mejor</span></div>
           ${scoreSpark}
         </section>
         <section class="card">
@@ -643,6 +656,7 @@
     if (act === 'env') { S.env = val; S.shown = 10; store.set('tp:env', val); }
     if (act === 'per') { S.per = val; S.shown = 10; store.set('tp:per', val); }
     if (act === 'golfPer') { S.golfPer = val; S.shown = 10; store.set('tp:golfPer', val); }
+    if (act === 'golfHoles') { S.golfHoles = Number(val); store.set('tp:golfHoles', Number(val)); }
     if (act === 'more') S.shown += 20;
     render();
   });
