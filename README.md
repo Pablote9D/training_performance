@@ -86,13 +86,12 @@ Editá `config.json` (se puede hacer desde la web de GitHub):
 
 ```json
 {
-  "objetivos": { "natacion_km_semana": 10, "golf_rondas_semana": 1 },
-  "objetivos": { "golf_golpes_9": 50, "golf_golpes_18": 100 },
+  "objetivos": { "natacion_km_semana": 10, "golf_rondas_semana": 1, "golf_golpes_9": 50, "golf_golpes_18": 100 },
   "proxima_carrera": { "nombre": "Cruce del lago", "fecha": "2027-01-15", "distancia_m": 3000 }
 }
 ```
 
-- `objetivos`: las metas de los anillos del resumen.
+- `objetivos`: las metas de los anillos del resumen y el objetivo de golpes por ronda de 9 y de 18 hoyos.
 - `proxima_carrera`: aparece con una cuenta regresiva en *Natación → Aguas abiertas*.
 
 ## Desarrollo local
