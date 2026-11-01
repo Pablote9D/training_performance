@@ -344,34 +344,34 @@ def _find_num(d: dict[str, Any], must: tuple[str, ...], avoid: tuple[str, ...] =
 
 
 def parse_clubs(raw: Any) -> list[dict[str, Any]]:
-    """Distancia promedio y máxima por palo, a partir de la respuesta de Garmin (formato no documentado)."""
+    """Distancia promedio y máxima por palo.
+
+    Formato visto en Garmin: cada palo trae `clubTypeId`, `averageDistance`, `retired`, `deleted` y
+    `clubStats` (`averageDistance`, `maxLifetimeDistance`, `maximumRecentDistance`, `shotsCount`).
+    """
     items = raw if isinstance(raw, list) else next((v for _, v in _walk(raw) if isinstance(v, list) and v and isinstance(v[0], dict)), [])
-    if items:
-        print("  estructura de un palo: " + json.dumps(_shape(items[0]), ensure_ascii=False)[:1500])
+    active = [c for c in items if not c.get("retired") and not c.get("deleted")]
     clubs = []
-    for c in items:
-        if c.get("retired") or c.get("deleted"):
-            continue
-        avg = _find_num(c, ("average", "distance")) or _find_num(c, ("avg", "distance"))
-        mx = _find_num(c, ("max", "distance")) or _find_num(c, ("longest",))
-        shots = _find_num(c, ("shot",), ("distance",)) or _find_num(c, ("count",))
+    for c in active:
+        st = c.get("clubStats") or {}
+        avg = st.get("averageDistance") or c.get("averageDistance")
+        mx = st.get("maxLifetimeDistance") or st.get("maximumRecentDistance")
+        shots = st.get("shotsCount")
         if not avg:
             continue
-        # Garmin suele informar distancias en centímetros
-        scale = 0.01 if avg > 1000 else 1
-        type_id = c.get("clubTypeId") or (c.get("clubType") or {}).get("id")
-        name = c.get("name") or c.get("clubName") or (c.get("clubType") or {}).get("name") or CLUB_TYPES.get(type_id) or f"Palo {type_id}"
+        type_id = c.get("clubTypeId")
+        name = c.get("name") or CLUB_TYPES.get(type_id) or f"Palo {type_id}"
         if "putter" in str(name).lower():
             continue
-        clubs.append({
-            "name": str(name),
-            "type": type_id,
-            "avg_m": round(avg * scale),
-            "max_m": round(mx * scale) if mx else None,
-            "shots": int(shots) if shots else None,
-        })
+        clubs.append({"name": str(name), "type": type_id, "avg_m": round(avg), "max_m": round(mx) if mx else None,
+                      "shots": int(shots) if shots else None})
+    # diagnóstico (solo números): ayuda a confirmar unidades y por qué un palo no aparece
+    print(f"  palos: {len(items)} en total, {len(active)} activos, {len(clubs)} con distancia")
+    for c in active[:14]:
+        st = c.get("clubStats") or {}
+        print(f"    tipo {c.get('clubTypeId')}: prom {c.get('averageDistance')} / stats prom {st.get('averageDistance')}, "
+              f"máx {st.get('maxLifetimeDistance')}, golpes {st.get('shotsCount')}")
     clubs.sort(key=lambda x: -x["avg_m"])
-    print(f"  {len(clubs)} palos con distancia")
     return clubs
 
 
