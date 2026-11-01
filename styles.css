@@ -232,6 +232,15 @@ a.row:hover, a.row:focus-visible { background: var(--card-2); }
 
 :focus-visible { outline: 2px solid var(--buoy); outline-offset: 2px; border-radius: 6px; }
 
+/* ───────── ambiente dev ───────── */
+.dev-badge {
+  position: fixed; z-index: 30; left: 50%; transform: translateX(-50%); bottom: calc(var(--nav-h) + var(--safe-b) + 10px); white-space: nowrap;
+  background: #ff2d87; color: #fff; border-radius: 999px; padding: 5px 12px;
+  font-size: 12px; font-weight: 700; letter-spacing: .04em; box-shadow: 0 4px 14px rgba(0,0,0,.35);
+}
+.dev-badge a { color: #fff; text-decoration: underline; font-weight: 600; letter-spacing: 0; }
+.env-dev .tabbar { border-top: 3px solid #ff2d87; }
+
 /* ───────── PC ───────── */
 @media (min-width: 900px) {
   .tabbar {
@@ -240,6 +249,8 @@ a.row:hover, a.row:focus-visible { background: var(--card-2); }
   }
   .tabbar a { flex-direction: row; gap: 8px; font-size: 14px; min-width: 0; padding: 0 16px; }
   .tabbar svg { width: 20px; height: 20px; }
+  .env-dev .tabbar { border-top: 0; border-bottom: 3px solid #ff2d87; }
+  .dev-badge { bottom: 16px; }
   .app { max-width: 1080px; padding: 84px 32px 48px; }
   .hero { margin: 0; border-radius: 28px; padding: 28px 28px 0; overflow: hidden; }
   .wave { width: calc(100% + 56px); margin: 4px -28px -1px; }

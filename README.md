@@ -66,6 +66,18 @@ Si falla al hacer `git push`, revisá **Settings → Actions → General → Wor
 
 Queda en `https://<tu-usuario>.github.io/training_performance/`. En el celular, desde el navegador, usá *Agregar a pantalla de inicio* para abrirla como app.
 
+## Ambientes: prod y dev
+
+| Ambiente | Rama | Dirección |
+|---|---|---|
+| **Prod** | `main` | `https://<tu-usuario>.github.io/training_performance/` |
+| **Dev** | `dev` | `https://<tu-usuario>.github.io/training_performance/dev/` |
+
+- Los cambios se hacen en `dev` y se prueban en `/dev/`, que muestra un distintivo **DEV** rosa. Cuando están bien, se pasan a `main` con un pull request.
+- Dev usa los mismos datos reales que prod: la sincronización con Garmin escribe solo en `main`, y al publicar se copian a `/dev/`.
+- Lo publica `.github/workflows/deploy.yml`, que arma un único sitio (prod en la raíz y dev en `/dev/`). Corre al cambiar `main`, después de cada sincronización y al cambiar `dev`.
+- Requiere **Settings → Pages → Source: GitHub Actions** (en lugar de "Deploy from a branch").
+
 ## Configuración
 
 Editá `config.json` (se puede hacer desde la web de GitHub):

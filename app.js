@@ -5,6 +5,8 @@
 
   const $app = document.getElementById('app');
   const $tip = document.getElementById('tip');
+  /** Ambiente: la copia publicada en /dev/ es el entorno de pruebas. */
+  const IS_DEV = /\/dev(\/|$)/.test(location.pathname);
 
   const PERIODS = [['S', 7, 'última semana'], ['M', 30, 'último mes'], ['3M', 90, 'últimos 3 meses'], ['A', 365, 'último año'], ['Todo', 0, 'todo el historial']];
   const FREE = 'libre';
@@ -713,7 +715,7 @@
       if (a.dataset.nav === nav) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
-    document.title = `${{ natacion: 'Natación', golf: 'Golf', resumen: 'Resumen' }[nav]} · Training Performance`;
+    document.title = `${IS_DEV ? 'DEV · ' : ''}${{ natacion: 'Natación', golf: 'Golf', resumen: 'Resumen' }[nav]} · Training Performance`;
     document.querySelector('meta[name="theme-color"]').setAttribute('content', nav === 'golf' ? '#c8e65a' : '#ff6a1a');
     afterRender.forEach((fn) => fn());
   }
@@ -771,6 +773,10 @@
   }
 
   async function init() {
+    if (IS_DEV) {
+      document.documentElement.classList.add('env-dev');
+      document.body.insertAdjacentHTML('beforeend', '<div class="dev-badge" role="note">DEV · <a href="../">ir a prod</a></div>');
+    }
     const [swim, golf, cfg] = await Promise.allSettled([fetchJSON('data/natacion.json'), fetchJSON('data/golf.json'), fetchJSON('config.json')]);
     if (swim.status === 'rejected' && golf.status === 'rejected') {
       $app.innerHTML = `<p class="error">No se pudieron cargar los datos.<br><span class="hint">Si abriste el archivo directo, serví la carpeta con <code>python3 -m http.server</code>.</span></p>`;

@@ -19,10 +19,14 @@ concurrency:
 
 jobs:
   sync:
+    # los datos viven solo en main (prod); dev los toma de ahí al publicarse
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
