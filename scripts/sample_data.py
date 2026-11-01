@@ -9,7 +9,7 @@ import json
 import random
 from pathlib import Path
 
-from swimcalc import best_efforts
+from swimcalc import derive
 
 DATA = Path(__file__).resolve().parent.parent / "data"
 rng = random.Random(42)
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     for f in det.glob("*.json"):
         f.unlink()
     for s in swims["sessions"]:
-        s["best"] = best_efforts(s["intervals"])
+        s.update(derive(s["intervals"]))
         (det / f"{s['id']}.json").write_text(json.dumps({"id": s["id"], "intervals": s.pop("intervals")}, ensure_ascii=False) + "\n")
         s["has_detail"] = True
     (DATA / "natacion.json").write_text(json.dumps(swims, ensure_ascii=False, indent=1) + "\n")

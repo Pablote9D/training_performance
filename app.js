@@ -1,4 +1,4 @@
-/* Training Performance — natación y golf desde Garmin.
+/* Training Performance — natación y golf desde Garmin. Dirección visual "Boya".
  * Página estática: lee data/natacion.json, data/sesiones/<id>.json, data/golf.json y config.json. */
 (() => {
   'use strict';
@@ -6,13 +6,15 @@
   const $app = document.getElementById('app');
   const $tip = document.getElementById('tip');
 
-  const PERIODS = [['S', 7, 'Semana'], ['M', 30, 'Mes'], ['3M', 90, '3 meses'], ['A', 365, 'Año'], ['Todo', 0, 'Todo']];
+  const PERIODS = [['S', 7, 'última semana'], ['M', 30, 'último mes'], ['3M', 90, 'últimos 3 meses'], ['A', 365, 'último año'], ['Todo', 0, 'todo el historial']];
+  const FREE = 'libre';
   const ICON = {
     swim: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 18c2 0 2-1.5 4-1.5S8 18 10 18s2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5"/><circle cx="16" cy="7" r="2"/><path d="M4 13l5-4 3 2 4-2"/></svg>',
     golf: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21V3l9 4-9 4"/><ellipse cx="12" cy="21" rx="7" ry="1.5"/></svg>',
     back: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
     info: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>',
   };
+  const WAVE = '<svg class="wave" viewBox="0 0 400 26" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13 Q 25 0 50 13 T 100 13 T 150 13 T 200 13 T 250 13 T 300 13 T 350 13 T 400 13 V26 H0 Z"/></svg>';
 
   // ───────── estado ─────────
   const store = {
@@ -25,6 +27,7 @@
     cfg: {},
     detail: new Map(),
     env: store.get('tp:env', 'pool'),
+    stroke: store.get('tp:stroke', 'crol'),
     per: store.get('tp:per', '3M'),
     golfPer: store.get('tp:golfPer', '3M'),
     golfHoles: store.get('tp:golfHoles', null),
@@ -46,6 +49,7 @@
   const vsPar = (n) => (n == null ? '—' : n === 0 ? 'E' : n > 0 ? `+${n}` : `−${-n}`);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const meters = (m) => `${nf(m)} m`;
+  const strokeName = (s) => (s === FREE ? 'crol' : s || 'otro');
 
   const parseD = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
   const isoD = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -68,23 +72,44 @@
     const start = addDays(end, -days);
     return rows.filter((r) => { const d = parseD(r.date); return d >= start && d < end; });
   }
-  const periodDays = (key) => (PERIODS.find((p) => p[0] === key) || PERIODS[2])[1];
+  const period = (key) => PERIODS.find((p) => p[0] === key) || PERIODS[2];
+  const periodDays = (key) => period(key)[1];
 
   // ───────── natación: cálculos ─────────
   const moving = (s) => s.moving_s || s.duration_s || 0;
-  const swimPace = (s) => pace(moving(s), s.distance_m);
-  function swimAgg(rows) {
-    const dist = rows.reduce((a, s) => a + (s.distance_m || 0), 0);
-    const mov = rows.reduce((a, s) => a + (s.distance_m ? moving(s) : 0), 0);
-    const sw = rows.filter((s) => s.swolf);
-    const w = sw.reduce((a, s) => a + (s.lengths || 1), 0);
-    return {
-      n: rows.length,
-      dist,
-      pace: pace(mov, dist),
-      swolf: w ? sw.reduce((a, s) => a + s.swolf * (s.lengths || 1), 0) / w : null,
-      longest: rows.reduce((a, s) => Math.max(a, s.distance_m || 0), 0),
-    };
+  /** ¿Se está mirando solo crol? (aguas abiertas es siempre crol, no se filtra) */
+  const crolMode = () => S.env === 'pool' && S.stroke === 'crol';
+
+  /** Métricas de una sesión según el filtro: d (m), t (s), swolf y su peso. */
+  function metrics(s, crol = crolMode()) {
+    if (crol) {
+      const b = s.by_stroke && s.by_stroke[FREE];
+      if (!b || !b.d) return { d: 0, t: 0, swolf: null, w: 0 };
+      return { d: b.d, t: b.t, swolf: b.n ? b.sw / b.n : null, w: b.n };
+    }
+    return { d: s.distance_m || 0, t: moving(s), swolf: s.swolf || null, w: s.lengths || 1 };
+  }
+  const sessionPace = (s, crol) => { const m = metrics(s, crol); return pace(m.t, m.d); };
+
+  function swimAgg(rows, crol = crolMode()) {
+    let dist = 0, time = 0, swSum = 0, swW = 0, n = 0, longest = 0;
+    for (const s of rows) {
+      const m = metrics(s, crol);
+      if (!m.d) continue;
+      n++; dist += m.d; time += m.t; longest = Math.max(longest, m.d);
+      if (m.swolf) { swSum += m.swolf * m.w; swW += m.w; }
+    }
+    return { n, dist, pace: pace(time, dist), swolf: swW ? swSum / swW : null, longest };
+  }
+
+  /** Semanas seguidas con al menos una sesión (cuenta la actual si ya nadaste). */
+  function streak(rows, crol = crolMode()) {
+    const weeks = new Set(rows.filter((s) => metrics(s, crol).d).map((s) => isoD(monday(parseD(s.date)))));
+    let w = monday(today());
+    if (!weeks.has(isoD(w))) w = addDays(w, -7);
+    let n = 0;
+    while (weeks.has(isoD(w))) { n++; w = addDays(w, -7); }
+    return n;
   }
 
   // ───────── golf: cálculos ─────────
@@ -106,6 +131,7 @@
     const putted = rows.filter((r) => r.putts != null && r.holes_played);
     return {
       n: rows.length,
+      full: f.length,
       avg: avg(f.map((r) => r.strokes)),
       best,
       putts: putted.length ? (holesType() * putted.reduce((a, r) => a + r.putts, 0)) / putted.reduce((a, r) => a + r.holes_played, 0) : null,
@@ -116,7 +142,7 @@
 
   // ───────── piezas de UI ─────────
   /** Variación vs. período anterior. better: 'up' | 'down' | null (neutro). */
-  function delta(cur, prev, fmt, better, suffix = 'vs. período ant.') {
+  function delta(cur, prev, fmt, better, suffix = 'vs. antes') {
     if (cur == null || prev == null || !isFinite(cur) || !isFinite(prev)) return '';
     const d = cur - prev;
     if (Math.abs(d) < 1e-9 || !/[1-9]/.test(fmt(Math.abs(d)))) return `<div class="sub">= ${suffix}</div>`;
@@ -128,7 +154,7 @@
 
   function pills(kind, current, action) {
     return `<div class="pills ${kind}" role="group" aria-label="Período">${PERIODS.map(([k, , name]) =>
-      `<button type="button" data-act="${action}" data-val="${k}" aria-pressed="${k === current}" aria-label="${name}">${k}</button>`).join('')}</div>`;
+      `<button type="button" data-act="${action}" data-val="${k}" aria-pressed="${k === current}" aria-label="${cap(name)}">${k}</button>`).join('')}</div>`;
   }
 
   function sampleBanner() {
@@ -143,11 +169,11 @@
   }
 
   let sparkId = 0;
-  /** Línea simple con lectura al pasar el dedo/mouse. */
-  function spark(points, { color, fmt, height = 64, label }) {
+  /** Línea con lectura al pasar el dedo/mouse. */
+  function spark(points, { color, fmt, height = 72, label }) {
     if (points.length < 2) return `<div class="empty">Hacen falta al menos 2 registros en el período</div>`;
     const id = `sp${++sparkId}`;
-    const W = 300, H = height, P = 6;
+    const W = 300, H = height, P = 8;
     const vals = points.map((p) => p.v);
     let lo = Math.min(...vals), hi = Math.max(...vals);
     if (hi - lo < 1e-9) { lo -= 1; hi += 1; }
@@ -163,7 +189,7 @@
         dot.style.left = `${(100 * x(i)) / W}%`; dot.style.top = `${y(points[i].v)}px`;
         rule.setAttribute('x1', x(i)); rule.setAttribute('x2', x(i));
         rule.style.opacity = i === last ? 0 : 1;
-        out.textContent = `${fmt(points[i].v)} · ${points[i].label}`;
+        out.innerHTML = `<b style="color:${color}">${esc(fmt(points[i].v))}</b> · ${esc(points[i].label)}${i === last ? ' (último)' : ''}`;
       };
       const at = (e) => {
         const r = svg.getBoundingClientRect();
@@ -177,31 +203,35 @@
     });
     return `<div class="spark" id="${id}">
       <svg viewBox="0 0 ${W} ${H}" height="${H}" preserveAspectRatio="none" role="img" aria-label="${esc(label)}">
-        <line class="rule" x1="0" x2="0" y1="0" y2="${H}" stroke="#48484a" stroke-width="1" vector-effect="non-scaling-stroke"/>
-        <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+        <line class="rule" x1="0" x2="0" y1="0" y2="${H}" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+        <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
       </svg>
-      <span class="dot" style="background:${color}" aria-hidden="true"></span>
+      <span class="dot" style="background:${color};border-color:${color}" aria-hidden="true"></span>
       <div class="readout"></div>
     </div>`;
   }
 
   function ring(swimPct, golfPct) {
-    const c1 = 2 * Math.PI * 46, c2 = 2 * Math.PI * 29;
-    const arc = (pct, c) => `${Math.max(0.001, Math.min(1, pct)) * c} ${c}`;
-    return `<svg width="110" height="110" viewBox="0 0 110 110" role="img" aria-label="Objetivos semanales: natación ${Math.round(swimPct * 100)}%, golf ${Math.round(golfPct * 100)}%">
-      <circle cx="55" cy="55" r="46" fill="none" stroke="var(--swim-track)" stroke-width="14"/>
-      <circle cx="55" cy="55" r="46" fill="none" stroke="var(--swim)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${arc(swimPct, c1)}" transform="rotate(-90 55 55)"/>
-      <circle cx="55" cy="55" r="29" fill="none" stroke="var(--golf-track)" stroke-width="14"/>
-      <circle cx="55" cy="55" r="29" fill="none" stroke="var(--golf)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${arc(golfPct, c2)}" transform="rotate(-90 55 55)"/>
+    const c1 = 2 * Math.PI * 44, c2 = 2 * Math.PI * 28;
+    const arc = (pct, c) => `${Math.min(1, pct) * c} ${c}`;
+    const cap0 = (pct) => (pct > 0 ? 'round' : 'butt');
+    return `<svg width="108" height="108" viewBox="0 0 108 108" role="img" aria-label="Objetivos de la semana: natación ${Math.round(swimPct * 100)}%, golf ${Math.round(golfPct * 100)}%">
+      <circle cx="54" cy="54" r="44" fill="none" stroke="rgba(26,13,5,.16)" stroke-width="13"/>
+      <circle cx="54" cy="54" r="44" fill="none" stroke="var(--buoy-ink)" stroke-width="13" stroke-linecap="${cap0(swimPct)}" stroke-dasharray="${arc(swimPct, c1)}" transform="rotate(-90 54 54)"/>
+      <circle cx="54" cy="54" r="28" fill="none" stroke="rgba(26,13,5,.16)" stroke-width="13"/>
+      <circle cx="54" cy="54" r="28" fill="none" stroke="#fff6ee" stroke-width="13" stroke-linecap="${cap0(golfPct)}" stroke-dasharray="${arc(golfPct, c2)}" transform="rotate(-90 54 54)"/>
     </svg>`;
   }
 
   function swimRow(s) {
-    const meta = [dayLabel(s.date), s.env === 'pool' ? `${s.pool_m || 25} m` : 'aguas abiertas', minutes(s.duration_s), s.avg_hr ? `FC ${s.avg_hr}` : ''].filter(Boolean).join(' · ');
+    const crol = crolMode() && s.env === 'pool';
+    const m = metrics(s, crol);
+    const meta = [dayLabel(s.date), s.env === 'pool' ? `${s.pool_m || 25} m` : 'aguas abiertas', minutes(s.duration_s)].join(' · ');
+    const sub = crol ? `${clock(pace(m.t, m.d))} /100m · de ${nf(s.distance_m)}` : `${clock(pace(m.t, m.d))} /100m`;
     return `<a class="row swim" href="#/natacion/${s.id}">
       <div class="ico swim">${ICON.swim}</div>
       <div class="main"><div class="t">${esc(s.name || (s.env === 'pool' ? 'Natación en pileta' : 'Aguas abiertas'))}</div><div class="m">${meta}</div></div>
-      <div class="end"><div class="v">${meters(s.distance_m)}</div><div class="s">${clock(swimPace(s))} /100m</div></div>
+      <div class="end"><div class="v">${meters(m.d)}${crol ? ' <small style="font-size:12px;font-weight:600;color:var(--text-2)">crol</small>' : ''}</div><div class="s">${sub}</div></div>
     </a>`;
   }
 
@@ -222,6 +252,21 @@
     return `<p class="hint" style="text-align:center">Actualizado ${d.toLocaleString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>`;
   }
 
+  function raceCard() {
+    const c = S.cfg.proxima_carrera || {};
+    if (!c.nombre || !c.fecha) return '';
+    const days = Math.round((parseD(c.fecha) - today()) / 864e5);
+    if (days < 0) return '';
+    return `<section class="race wide">
+      <div>
+        <div class="hint" style="text-transform:uppercase;letter-spacing:.08em">Próxima carrera</div>
+        <div style="font-size:17px;font-weight:600">${esc(c.nombre)}</div>
+        <div class="muted">${shortDate(c.fecha)}${c.distancia_m ? ` · ${meters(c.distancia_m)}` : ''}</div>
+      </div>
+      <div><div class="n num">${days === 0 ? '¡Hoy!' : days}</div>${days ? `<div class="muted" style="text-align:right">${days === 1 ? 'día' : 'días'}</div>` : ''}</div>
+    </section>`;
+  }
+
   // ───────── vista: resumen ─────────
   function viewResumen() {
     const ws = monday(today());
@@ -231,11 +276,11 @@
     const lastW = S.swim.sessions.filter((s) => { const d = parseD(s.date); return d >= addDays(ws, -7) && d < ws; });
     const km = thisW.reduce((a, s) => a + s.distance_m, 0) / 1000;
     const rounds = S.golf.rounds.filter((r) => parseD(r.date) >= ws).length;
-    const a = swimAgg(thisW), b = swimAgg(lastW);
+    const a = swimAgg(thisW, true), b = swimAgg(lastW, true);
 
     const recentFull = S.golf.rounds.filter(fullRound).slice(-5);
     const golfCard = S.golf.handicap != null
-      ? kpi('Índice hándicap', nf(S.golf.handicap, 1), '', '<div class="sub">según Garmin</div>')
+      ? kpi('Hándicap', nf(S.golf.handicap, 1), '', '<div class="sub">según Garmin</div>')
       : kpi('Promedio últimas 5', recentFull.length ? nf(golfAgg(recentFull).avg, 1) : '—', 'golpes', `<div class="sub">rondas de ${holesType()} hoyos</div>`);
 
     const latest = [
@@ -244,21 +289,22 @@
     ].sort((x, y) => y.k.localeCompare(x.k)).slice(0, 4);
 
     return `
-      <header class="head">
+      <section class="hero">
         <div class="eyebrow">${cap(new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }))}</div>
-        <h1 class="title">Resumen</h1>
-      </header>
-      ${sampleBanner()}
-      <section class="card ring-card" aria-label="Objetivos de la semana">
-        ${ring(km / swimGoal, rounds / golfGoal)}
-        <div class="ring-legend">
-          <div><div style="font-weight:600">Natación</div><div class="v" style="color:var(--swim)">${nf(km, 1)}<small>/${nf(swimGoal)} km</small></div></div>
-          <div><div style="font-weight:600">Golf</div><div class="v" style="color:var(--golf)">${rounds}<small>/${golfGoal} ${golfGoal === 1 ? 'ronda' : 'rondas'}</small></div></div>
-          <div class="hint">Esta semana (desde el lunes)</div>
+        <div class="rings">
+          ${ring(km / swimGoal, rounds / golfGoal)}
+          <div class="ring-legend">
+            <h1 style="font-size:22px">Esta semana</h1>
+            <div><div class="l">Natación</div><div class="v">${nf(km, 1)}<small> / ${nf(swimGoal)} km</small></div></div>
+            <div><div class="l">Golf</div><div class="v">${rounds}<small> / ${golfGoal} ${golfGoal === 1 ? 'ronda' : 'rondas'}</small></div></div>
+          </div>
         </div>
+        ${WAVE}
       </section>
+      ${sampleBanner()}
+      ${raceCard()}
       <section class="cols">
-        ${kpi('Ritmo semana', a.pace ? clock(a.pace) : '—', '/100m', delta(a.pace, b.pace, (v) => `${Math.round(v)} s`, 'down', 'vs. sem. pasada'))}
+        ${kpi('Ritmo crol, semana', a.pace ? clock(a.pace) : '—', '/100m', delta(a.pace, b.pace, (v) => `${Math.round(v)} s`, 'down', 'vs. sem. pasada'))}
         ${golfCard}
       </section>
       <section class="stack">
@@ -271,115 +317,129 @@
   // ───────── vista: natación ─────────
   function volumeChart(rows) {
     const days = periodDays(S.per);
-    let buckets = [], title, unitLbl;
+    let buckets = [], weekly;
     if (days && days <= 90) {
       const n = days === 90 ? 13 : 8;
       const start = addDays(monday(today()), -7 * (n - 1));
       for (let i = 0; i < n; i++) buckets.push({ from: addDays(start, 7 * i), to: addDays(start, 7 * (i + 1)), v: 0 });
-      title = 'Volumen semanal'; unitLbl = (b) => `Semana del ${shortDate(isoD(b.from))}`;
+      weekly = true;
     } else {
       const first = days ? addDays(today(), -days + 1) : (rows[0] ? parseD(rows[0].date) : today());
       let m = new Date(first.getFullYear(), first.getMonth(), 1);
-      const end = today();
-      while (m <= end) { const nx = new Date(m.getFullYear(), m.getMonth() + 1, 1); buckets.push({ from: m, to: nx, v: 0 }); m = nx; }
-      title = 'Volumen mensual'; unitLbl = (b) => cap(b.from.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }));
+      while (m <= today()) { const nx = new Date(m.getFullYear(), m.getMonth() + 1, 1); buckets.push({ from: m, to: nx, v: 0 }); m = nx; }
+      weekly = false;
     }
     for (const s of rows) {
       const d = parseD(s.date);
       const b = buckets.find((x) => d >= x.from && d < x.to);
-      if (b) b.v += s.distance_m || 0;
+      if (b) b.v += metrics(s).d;
     }
     const avg = buckets.reduce((a, b) => a + b.v, 0) / (buckets.length || 1);
-    const items = buckets.map((b, i) => ({
-      v: b.v, cls: (i === buckets.length - 1 ? 'cur ' : '') + (b.v ? '' : 'zero'),
-      tip: `${unitLbl(b)}\n${nf(b.v / 1000, 1)} km`,
-    }));
-    const lbl = (b) => (title === 'Volumen semanal' ? shortDate(isoD(b.from)) : cap(b.from.toLocaleDateString('es-AR', { month: 'short' }).replace('.', '')));
-    const mid = buckets[Math.floor(buckets.length / 2)];
+    const tipLbl = (b) => (weekly ? `Semana del ${shortDate(isoD(b.from))}` : cap(b.from.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })));
+    const items = buckets.map((b, i) => ({ v: b.v, cls: (i === buckets.length - 1 ? 'cur ' : '') + (b.v ? '' : 'zero'), tip: `${tipLbl(b)}\n${nf(b.v / 1000, 1)} km` }));
+    const lbl = (b) => (weekly ? shortDate(isoD(b.from)) : cap(b.from.toLocaleDateString('es-AR', { month: 'short' }).replace('.', '')));
+    const title = `Km por ${weekly ? 'semana' : 'mes'}`;
     return `<section class="card wide">
-      <div class="card-head"><h2 class="card-title">${title}</h2><span class="muted">prom. ${nf(avg / 1000, 1)} km</span></div>
-      ${bars(items, { label: `${title}, promedio ${nf(avg / 1000, 1)} km` })}
-      <div class="axis"><span>${lbl(buckets[0])}</span><span>${lbl(mid)}</span><span>${title === 'Volumen semanal' ? 'esta sem.' : 'este mes'}</span></div>
+      <div class="card-head"><h2 class="card-title">${title}</h2><span class="muted">prom. ${nf(avg / 1000, 1)}</span></div>
+      ${bars(items, { label: `${title}${crolMode() ? ' de crol' : ''}, promedio ${nf(avg / 1000, 1)} km` })}
+      <div class="axis"><span>${lbl(buckets[0])}</span><span>${lbl(buckets[Math.floor(buckets.length / 2)])}</span><span>${weekly ? 'esta sem.' : 'este mes'}</span></div>
     </section>`;
   }
 
   function prCard(pool) {
+    const crol = crolMode();
     const best = {};
-    for (const s of pool) for (const [d, t] of Object.entries(s.best || {})) if (!best[d] || t < best[d].t) best[d] = { t, s };
+    for (const s of pool) {
+      for (const [d, v] of Object.entries((crol ? s.best_free : s.best) || {})) {
+        const t = typeof v === 'number' ? v : v.t;
+        if (!best[d] || t < best[d].t) best[d] = { t, s, st: typeof v === 'number' ? null : v.s };
+      }
+    }
     const longest = pool.reduce((a, s) => (!a || s.distance_m > a.distance_m ? s : a), null);
     const rows = Object.keys(best).sort((a, b) => a - b).map((d) =>
-      `<a class="list-row" href="#/natacion/${best[d].s.id}" style="color:inherit"><span>${nf(+d)} m</span><span class="muted">${shortDate(best[d].s.date)}</span><span class="big">${clock(best[d].t)}</span></a>`);
-    if (longest) rows.push(`<a class="list-row" href="#/natacion/${longest.id}" style="color:inherit"><span>Sesión más larga</span><span class="muted">${shortDate(longest.date)}</span><span class="big">${meters(longest.distance_m)}</span></a>`);
+      `<a class="list-row" href="#/natacion/${best[d].s.id}"><span>${nf(+d)} m${!crol && best[d].st ? ` <span class="muted">${esc(strokeName(best[d].st))}</span>` : ''}</span><span class="muted">${shortDate(best[d].s.date)}</span><span class="big">${clock(best[d].t)}</span></a>`);
+    if (longest) rows.push(`<a class="list-row" href="#/natacion/${longest.id}"><span>Sesión más larga</span><span class="muted">${shortDate(longest.date)}</span><span class="big">${meters(longest.distance_m)}</span></a>`);
     return `<section class="card">
-      <div class="card-head"><h2 class="card-title">Récords personales</h2><span class="muted">pileta · histórico</span></div>
+      <div class="card-head"><h2 class="card-title">Récords${crol ? ' de crol' : ''}</h2><span class="muted">histórico</span></div>
       <div>${rows.join('') || '<div class="empty">Sin récords todavía</div>'}</div>
-      <div class="hint">Mejor tiempo nadado de corrido dentro de un intervalo.</div>
-    </section>`;
-  }
-
-  function raceCard() {
-    const c = S.cfg.proxima_carrera || {};
-    if (!c.nombre || !c.fecha) return '';
-    const days = Math.round((parseD(c.fecha) - today()) / 864e5);
-    if (days < 0) return '';
-    return `<section class="card wide">
-      <div class="card-head"><h2 class="card-title">Próxima carrera</h2><span class="muted">${shortDate(c.fecha)}</span></div>
-      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
-        <div><div style="font-size:17px;font-weight:600">${esc(c.nombre)}</div>${c.distancia_m ? `<div class="muted">${meters(c.distancia_m)}</div>` : ''}</div>
-        <div style="font-size:28px;font-weight:700;color:var(--swim)" class="num">${days === 0 ? '¡Hoy!' : `${days} <small style="font-size:14px;color:var(--text-2)">${days === 1 ? 'día' : 'días'}</small>`}</div>
-      </div>
+      <div class="hint">Mejor tiempo nadado de corrido, en un solo estilo, dentro de un intervalo.</div>
     </section>`;
   }
 
   function viewNatacion() {
     const pool = S.env === 'pool';
+    const crol = crolMode();
     const rows = S.swim.sessions.filter((s) => s.env === S.env);
-    const days = periodDays(S.per);
+    const [, days, pname] = period(S.per);
     const cur = inPeriod(rows, days), prev = inPeriod(rows, days, 1);
     const a = swimAgg(cur), b = swimAgg(prev);
-    const hasPrev = days && prev.length;
+    const all = swimAgg(cur, false);
+    const hasPrev = days && b.n;
     const d = (x, y, f, bt) => (hasPrev ? delta(x, y, f, bt) : '');
 
+    const label = pool ? `${crol ? 'Crol' : 'Todos los estilos'} · ${pname}` : `Aguas abiertas · ${pname}`;
+    const sub = crol && all.dist
+      ? `${nf((100 * a.dist) / all.dist)}% de lo que nadaste · ${a.n} ${a.n === 1 ? 'sesión' : 'sesiones'}`
+      : `${a.n} ${pool ? (a.n === 1 ? 'sesión' : 'sesiones') : (a.n === 1 ? 'nado' : 'nados')}`;
+    const strk = streak(rows);
+
     const kpis = [
-      kpi('Distancia', nf(a.dist / 1000, 1), 'km', d(a.dist / 1000, b.dist / 1000, (v) => `${nf(v, 1)} km`, 'up')),
-      kpi(pool ? 'Sesiones' : 'Nados', a.n, '', d(a.n, b.n, (v) => nf(v), 'up')),
-      kpi('Ritmo prom.', a.pace ? clock(a.pace) : '—', '/100m', d(a.pace, b.pace, (v) => `${Math.round(v)} s`, 'down')),
+      kpi('Ritmo', a.pace ? clock(a.pace) : '—', '/100m', d(a.pace, b.pace, (v) => `${Math.round(v)} s`, 'down')),
       pool
-        ? kpi('SWOLF prom.', a.swolf ? nf(a.swolf) : '—', '', d(a.swolf, b.swolf, (v) => nf(v, 1), 'down'))
+        ? kpi('SWOLF', a.swolf ? nf(a.swolf) : '—', '', d(a.swolf, b.swolf, (v) => nf(v, 1), 'down'))
         : kpi('Más largo', a.longest ? nf(a.longest) : '—', 'm'),
+      kpi('Racha', strk, strk === 1 ? 'semana' : 'semanas', '<div class="sub">seguidas</div>'),
     ].join('');
 
-    const pts = cur.filter((s) => swimPace(s));
-    const paceSpark = spark(pts.map((s) => ({ v: swimPace(s), label: shortDate(s.date) })), { color: 'var(--swim)', fmt: (v) => `${clock(v)} /100m`, label: 'Ritmo por sesión' });
-    const swPts = cur.filter((s) => s.swolf);
-    const swolfSpark = spark(swPts.map((s) => ({ v: s.swolf, label: shortDate(s.date) })), { color: 'var(--swolf)', fmt: (v) => `SWOLF ${nf(v)}`, label: 'SWOLF por sesión' });
+    const withPace = cur.filter((s) => sessionPace(s));
+    const paceSpark = spark(withPace.map((s) => ({ v: sessionPace(s), label: shortDate(s.date) })),
+      { color: 'var(--teal)', fmt: (v) => `${clock(v)} /100m`, label: `Ritmo${crol ? ' de crol' : ''} por sesión` });
+    const withSw = cur.filter((s) => metrics(s).swolf);
+    const swolfSpark = spark(withSw.map((s) => ({ v: metrics(s).swolf, label: shortDate(s.date) })),
+      { color: 'var(--sand)', fmt: (v) => `SWOLF ${nf(v)}`, label: `SWOLF${crol ? ' de crol' : ''} por sesión` });
 
-    const list = [...cur].reverse();
+    const list = cur.filter((s) => metrics(s).d).reverse();
     return `
-      <header class="head"><h1 class="title">Natación</h1></header>
+      <section class="hero">
+        <div class="hero-top">
+          <h1>Natación</h1>
+          ${pool ? `<div class="toggle" role="group" aria-label="Estilo">
+            <button type="button" data-act="stroke" data-val="crol" aria-pressed="${crol}">Crol</button>
+            <button type="button" data-act="stroke" data-val="todos" aria-pressed="${!crol}">Todos</button>
+          </div>` : ''}
+        </div>
+        <div>
+          <div class="label">${label}</div>
+          <div class="big">${nf(a.dist / 1000, 1)}<small> km</small></div>
+          <div class="sub">${sub}</div>
+        </div>
+        ${WAVE}
+      </section>
       ${sampleBanner()}
-      <div class="segmented" role="group" aria-label="Tipo de nado">
-        <button type="button" data-act="env" data-val="pool" aria-pressed="${pool}">Pileta</button>
-        <button type="button" data-act="env" data-val="ow" aria-pressed="${!pool}">Aguas abiertas</button>
+      <div class="controls">
+        <div class="segmented" role="group" aria-label="Dónde">
+          <button type="button" data-act="env" data-val="pool" aria-pressed="${pool}">Pileta</button>
+          <button type="button" data-act="env" data-val="ow" aria-pressed="${!pool}">Aguas abiertas</button>
+        </div>
+        ${pills('swim', S.per, 'per')}
       </div>
-      ${pills('swim', S.per, 'per')}
-      <section class="cols kpis swim">${kpis}</section>
+      <section class="cols-3">${kpis}</section>
       <div class="split">
-        ${pool ? '' : raceCard()}
+        ${raceCard()}
         ${volumeChart(rows)}
         <section class="card">
-          <div class="card-head"><h2 class="card-title">Ritmo /100m</h2><span class="hint">menor es mejor</span></div>
+          <div class="card-head"><h2 class="card-title">Ritmo /100 m</h2><span class="hint">más abajo = más rápido</span></div>
           ${paceSpark}
         </section>
         ${pool ? `<section class="card">
-          <div class="card-head"><h2 class="card-title">SWOLF</h2><span class="hint">menor es mejor</span></div>
+          <div class="card-head"><h2 class="card-title">SWOLF</h2><span class="hint">más abajo = mejor</span></div>
           ${swolfSpark}
-          <div class="hint">Tiempo + brazadas por pileta.</div>
+          <div class="hint">Segundos + brazadas en cada pileta.</div>
         </section>` : ''}
         ${pool ? prCard(rows) : ''}
         <section class="stack ${pool ? '' : 'wide'}">
           <h2 class="section-title">Sesiones</h2>
-          ${list.slice(0, S.shown).map(swimRow).join('') || `<div class="empty">No hay ${pool ? 'sesiones en pileta' : 'nados en aguas abiertas'} en este período</div>`}
+          ${list.slice(0, S.shown).map(swimRow).join('') || `<div class="empty">No hay ${pool ? (crol ? 'sesiones con crol' : 'sesiones en pileta') : 'nados en aguas abiertas'} en este período</div>`}
           ${list.length > S.shown ? `<button type="button" class="more" data-act="more">Ver más (${list.length - S.shown})</button>` : ''}
         </section>
       </div>`;
@@ -395,15 +455,29 @@
     }
     const intervals = det?.intervals || [];
     const loading = det === undefined && s.has_detail;
+    const free = metrics(s, true);
+    const isPool = s.env === 'pool';
 
     const stats = [
-      ['Distancia', meters(s.distance_m), 'var(--swim)'],
       ['Tiempo', clock(s.duration_s)],
-      ['Ritmo', `${clock(swimPace(s))}`],
-      ['SWOLF', s.swolf ?? '—', 'var(--swolf)'],
-      ['FC prom.', s.avg_hr ?? '—', 'var(--hr)'],
+      ['Ritmo', clock(pace(moving(s), s.distance_m))],
+      ['SWOLF', s.swolf ?? '—', 'var(--sand)'],
+      ['FC prom.', s.avg_hr ?? '—'],
+      ['FC máx.', s.max_hr ?? '—'],
       ['Calorías', s.calories ?? '—'],
     ].map(([l, v, c]) => `<div><div class="label">${l}</div><div class="value" ${c ? `style="color:${c}"` : ''}>${v}</div></div>`).join('');
+
+    // estilos
+    let strokesHtml = '';
+    const bs = Object.entries(s.by_stroke || {}).filter(([, v]) => v.d).sort((x, y) => (x[0] === FREE ? -1 : y[0] === FREE ? 1 : y[1].d - x[1].d));
+    if (bs.length) {
+      const tot = bs.reduce((a, [, v]) => a + v.d, 0);
+      strokesHtml = `<section class="card">
+        <h2 class="card-title">Estilos</h2>
+        <div class="split-bar" role="img" aria-label="Reparto por estilo">${bs.map(([k, v]) => `<span style="flex:${v.d} 1 0;background:${k === FREE ? 'var(--teal)' : 'var(--other)'}" data-tip="${esc(cap(strokeName(k)))}\n${meters(v.d)}"></span>`).join('')}</div>
+        <div>${bs.map(([k, v]) => `<div class="list-row"><span style="font-weight:${k === FREE ? 700 : 400}">${esc(cap(strokeName(k)))}</span><span class="muted">${nf((100 * v.d) / tot)}%${k === 'técnica' ? '' : ` · ${clock(pace(v.t, v.d))} /100m`}</span><span class="big">${meters(v.d)}</span></div>`).join('')}</div>
+      </section>`;
+    }
 
     // piletas
     let lapsHtml = '';
@@ -413,22 +487,21 @@
       const speeds = all.map((l) => l.d / l.t).sort((x, y) => x - y);
       const q = (f) => speeds[Math.min(speeds.length - 1, Math.floor(f * speeds.length))];
       const lo = q(0.03) * 0.85, hi = q(0.97);
-      let k = 0, act = 0;
+      let k = 0;
       const items = [];
       for (const it of intervals) {
         if (it.kind === 'rest') { if (items.length) items.push({ v: 0, h: 0, cls: 'rest' }); continue; }
-        const cls = act++ % 2 ? 'alt' : 'main';
         for (const l of it.lengths || []) {
           if (!l.t || !l.d) continue;
           k++;
-          const tip = [`Pileta ${k}`, `${clock(l.t)} · ${clock(pace(l.t, l.d))} /100m`, [l.swolf ? `SWOLF ${l.swolf}` : '', l.stroke || ''].filter(Boolean).join(' · ')].filter(Boolean).join('\n');
-          items.push({ v: 1, h: Math.max(4, Math.min(100, 8 + (92 * (l.d / l.t - lo)) / (hi - lo || 1))), cls, tip });
+          const tip = [`Pileta ${k} · ${strokeName(l.stroke)}`, `${clock(l.t)} · ${clock(pace(l.t, l.d))} /100m`, l.swolf ? `SWOLF ${l.swolf}` : ''].filter(Boolean).join('\n');
+          items.push({ v: 1, h: Math.max(4, Math.min(100, 8 + (92 * (l.d / l.t - lo)) / (hi - lo || 1))), cls: l.stroke === FREE ? 'free' : 'oth', tip });
         }
       }
       lapsHtml = `<section class="card wide">
         <div class="card-head"><h2 class="card-title">Ritmo por pileta</h2><span class="muted">${k} piletas</span></div>
         ${bars(items, { cls: 'laps', label: `Ritmo de cada una de las ${k} piletas` })}
-        <div class="legend"><span><i style="background:var(--swim)"></i><i style="background:var(--swim-dim);margin-left:-4px"></i>Intervalos (alternados)</span><span>más alto = más rápido · huecos = descansos</span></div>
+        <div class="legend"><span><i style="background:var(--teal)"></i>Crol</span><span><i style="background:var(--other)"></i>Otros estilos</span><span>más alto = más rápido · huecos = descansos</span></div>
       </section>`;
     }
 
@@ -450,24 +523,34 @@
       const rowsHtml = intervals.map((it) => {
         if (it.kind === 'rest') return `<div class="rest">Descanso ${clock(it.duration_s)}</div>`;
         n++;
-        return `<div class="tr"><span class="name">${n}. ${nf(it.distance_m)} ${esc(it.stroke || '')}</span><span>${clock(it.duration_s)}</span><span>${clock(pace(it.duration_s, it.distance_m))}</span><span>${it.swolf ?? '—'}</span></div>`;
+        return `<div class="tr ${it.stroke === FREE ? 'free' : ''}"><span class="name">${n}. ${nf(it.distance_m)} ${esc(strokeName(it.stroke))}</span><span>${clock(it.duration_s)}</span><span>${clock(pace(it.duration_s, it.distance_m))}</span><span>${it.swolf || '—'}</span></div>`;
       }).join('');
-      tableHtml = `<section class="card ${zonesHtml ? '' : 'wide'}">
+      tableHtml = `<section class="card wide">
         <h2 class="card-title">Intervalos</h2>
         <div class="table"><div class="tr th"><span>Tramo</span><span>Tiempo</span><span>/100m</span><span>SWOLF</span></div>${rowsHtml}</div>
       </section>`;
     }
 
+    const heroSub = isPool && free.d
+      ? `${meters(free.d)} de crol (${nf((100 * free.d) / s.distance_m)}%) a ${clock(pace(free.t, free.d))} /100m`
+      : `${clock(pace(moving(s), s.distance_m))} /100m`;
     return `
-      <a class="back" href="#/natacion">${ICON.back}Natación</a>
-      <header class="head">
-        <div class="eyebrow">${dayLabel(s.date)} · ${s.time} · ${s.env === 'pool' ? `Pileta ${s.pool_m || 25} m` : 'Aguas abiertas'}</div>
-        <h1 class="title title-sm">${esc(s.name || 'Natación')}</h1>
-      </header>
+      <section class="hero">
+        <a class="back" href="#/natacion">${ICON.back}Natación</a>
+        <div>
+          <div class="eyebrow">${dayLabel(s.date)} · ${s.time} · ${isPool ? `Pileta ${s.pool_m || 25} m` : 'Aguas abiertas'}</div>
+          <h1>${esc(s.name || 'Natación')}</h1>
+        </div>
+        <div>
+          <div class="big" style="font-size:64px">${nf(s.distance_m)}<small> m</small></div>
+          <div class="sub">${heroSub}</div>
+        </div>
+        ${WAVE}
+      </section>
       <section class="card"><div class="stats">${stats}</div></section>
       <div class="split">
         ${loading ? '<div class="empty wide">Cargando detalle…</div>' : ''}
-        ${lapsHtml}${zonesHtml}${tableHtml}
+        ${lapsHtml}${strokesHtml}${zonesHtml}${tableHtml}
       </div>`;
   }
 
@@ -485,7 +568,7 @@
       const fill = (fn) => p.map(fn).join('') + '<span></span>'.repeat(9 - p.length);
       const label = parts.length > 1 ? (idx ? 'Vuelta' : 'Ida') : 'Tot';
       return `<div class="scorecard">
-        <span class="lbl">Hoyo</span>${fill((h) => `<span class="dim">${h.n}</span>`)}<span class="dim">${label === 'Tot' ? 'Tot' : label}</span>
+        <span class="lbl">Hoyo</span>${fill((h) => `<span class="dim">${h.n}</span>`)}<span class="dim">${label}</span>
         <span class="lbl">Par</span>${fill((h) => `<span class="dim">${h.par ?? ''}</span>`)}<span class="dim">${sum(p, 'par') || ''}</span>
         <span class="lbl">Score</span>${fill(cell)}<span class="tot">${sum(p, 'strokes')}</span>
         <span class="lbl">Putts</span>${fill((h) => `<span class="dim">${h.putts ?? ''}</span>`)}<span class="dim">${sum(p, 'putts') || ''}</span>
@@ -496,26 +579,24 @@
 
   function viewGolf() {
     const rows = S.golf.rounds;
-    const days = periodDays(S.golfPer);
+    const [, days, pname] = period(S.golfPer);
     const cur = inPeriod(rows, days), prev = inPeriod(rows, days, 1);
     const a = golfAgg(cur), b = golfAgg(prev);
     const hasPrev = days && prev.length;
-    const d = (x, y, f, bt) => (hasPrev ? delta(x, y, f, bt, '') : '');
+    const d = (x, y, f, bt) => (hasPrev ? delta(x, y, f, bt) : '');
+    const ht = holesType();
 
     const kpis = [
-      kpi('Hándicap', S.golf.handicap != null ? nf(S.golf.handicap, 1) : '—', '', '<div class="sub">según Garmin</div>'),
-      kpi('Promedio', a.avg ? nf(a.avg, 1) : '—', '', d(a.avg, b.avg, (v) => nf(v, 1), 'down') || `<div class="sub">rondas de ${holesType()}</div>`),
       kpi('Mejor', a.best ? a.best.strokes : '—', '', a.best ? `<div class="sub">${a.best.par ? vsPar(a.best.strokes - a.best.par) + ' · ' : ''}${shortDate(a.best.date)}</div>` : ''),
-      kpi('Putts', a.putts ? nf(a.putts, 1) : '—', '', d(a.putts, b.putts, (v) => nf(v, 1), 'down') || `<div class="sub">por ronda de ${holesType()}</div>`),
+      kpi('Putts', a.putts ? nf(a.putts, 1) : '—', '', d(a.putts, b.putts, (v) => nf(v, 1), 'down') || `<div class="sub">por ronda de ${ht}</div>`),
       kpi('Fairways', a.fw != null ? `${nf(a.fw)}%` : '—', '', d(a.fw, b.fw, (v) => `${nf(v)} pts`, 'up') || '<div class="sub">acertados</div>'),
       kpi('GIR', a.gir != null ? `${nf(a.gir)}%` : '—', '', d(a.gir, b.gir, (v) => `${nf(v)} pts`, 'up') || '<div class="sub">en regulación</div>'),
     ].join('');
 
     const f = cur.filter(fullRound);
     const scoreSpark = spark(f.map((r) => ({ v: r.strokes, label: `${shortDate(r.date)} · ${r.course}` })),
-      { color: 'var(--golf)', fmt: (v) => `${v} golpes`, height: 110, label: `Golpes por ronda de ${holesType()} hoyos` });
+      { color: 'var(--golf)', fmt: (v) => `${v} golpes`, height: 110, label: `Golpes por ronda de ${ht} hoyos` });
 
-    // golpes por tipo de hoyo y salida
     const byPar = { 3: [], 4: [], 5: [] };
     for (const r of cur) for (const h of r.holes || []) if (byPar[h.par]) byPar[h.par].push(h.strokes);
     const parBoxes = [3, 4, 5].map((p) => {
@@ -537,16 +618,27 @@
 
     const last = rows[rows.length - 1];
     const list = [...cur].reverse();
+    const heroSub = [S.golf.handicap != null ? `Hándicap ${nf(S.golf.handicap, 1)}` : '', `${a.full} ${a.full === 1 ? 'ronda' : 'rondas'} de ${ht}`, hasPrev && a.avg && b.avg ? `${a.avg <= b.avg ? '▼' : '▲'} ${nf(Math.abs(a.avg - b.avg), 1)} vs. antes` : ''].filter(Boolean).join(' · ');
     return `
-      <header class="head"><h1 class="title">Golf</h1></header>
+      <section class="hero golf">
+        <div class="hero-top">
+          <h1>Golf</h1>
+          ${roundTypes().length > 1 ? `<div class="toggle" role="group" aria-label="Tipo de ronda">${roundTypes().map((n) =>
+            `<button type="button" data-act="golfHoles" data-val="${n}" aria-pressed="${n === ht}">${n} hoyos</button>`).join('')}</div>` : ''}
+        </div>
+        <div>
+          <div class="label">Promedio · ${pname}</div>
+          <div class="big">${a.avg ? nf(a.avg, 1) : '—'}<small> golpes</small></div>
+          <div class="sub">${heroSub}</div>
+        </div>
+        ${WAVE}
+      </section>
       ${sampleBanner()}
-      ${roundTypes().length > 1 ? `<div class="segmented" role="group" aria-label="Tipo de ronda">${roundTypes().map((n) =>
-        `<button type="button" data-act="golfHoles" data-val="${n}" aria-pressed="${n === holesType()}">${n} hoyos</button>`).join('')}</div>` : ''}
-      ${pills('golf', S.golfPer, 'golfPer')}
-      <section class="cols-3 kpis golf">${kpis}</section>
+      <div class="controls">${pills('golf', S.golfPer, 'golfPer')}</div>
+      <section class="cols kpis">${kpis}</section>
       <div class="split">
         <section class="card wide">
-          <div class="card-head"><h2 class="card-title">Golpes por ronda</h2><span class="hint">${holesType()} hoyos · menor es mejor</span></div>
+          <div class="card-head"><h2 class="card-title">Golpes por ronda</h2><span class="hint">${ht} hoyos · más abajo = mejor</span></div>
           ${scoreSpark}
         </section>
         <section class="card">
@@ -555,7 +647,7 @@
           ${tee}
         </section>
         ${last ? `<section class="card">
-          <div class="card-head"><h2 class="card-title" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Última ronda · ${esc(last.course)}</h2><a class="muted" href="#/golf/${last.id}" style="flex-shrink:0">${shortDate(last.date)} ›</a></div>
+          <div class="card-head"><h2 class="card-title" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Última ronda</h2><a href="#/golf/${last.id}" style="flex-shrink:0;color:var(--golf);font-size:13px">${shortDate(last.date)} ›</a></div>
           ${scorecard(last.holes || [])}
           ${scLegend}
         </section>` : ''}
@@ -572,26 +664,32 @@
     if (!r) return notFound('#/golf', 'Golf');
     const over = r.par ? r.strokes - r.par : null;
     const stats = [
-      ['Golpes', r.strokes, 'var(--golf)'],
-      ['vs. par', vsPar(over)],
       ['Putts', r.putts ?? '—'],
       ['Fairways', r.fairways_total ? `${r.fairways_hit}/${r.fairways_total}` : '—'],
       ['GIR', r.gir != null ? `${r.gir}/${r.gir_total || r.holes_played}` : '—'],
       ['Penalidades', r.penalties ?? 0],
-    ].map(([l, v, c]) => `<div><div class="label">${l}</div><div class="value" ${c ? `style="color:${c}"` : ''}>${v}</div></div>`).join('');
-    return `<div class="golf-page" style="display:contents">
-      <a class="back" href="#/golf">${ICON.back}Golf</a>
-      <header class="head">
-        <div class="eyebrow">${dayLabel(r.date)} · ${r.time} · ${r.holes_played} hoyos</div>
-        <h1 class="title title-sm">${esc(r.course || 'Ronda')}</h1>
-      </header>
+      ['Par', r.par ?? '—'],
+      ['Hoyos', r.holes_played],
+    ].map(([l, v]) => `<div><div class="label">${l}</div><div class="value">${v}</div></div>`).join('');
+    return `
+      <section class="hero golf">
+        <a class="back" href="#/golf">${ICON.back}Golf</a>
+        <div>
+          <div class="eyebrow">${dayLabel(r.date)} · ${r.time} · ${r.holes_played} hoyos</div>
+          <h1>${esc(r.course || 'Ronda')}</h1>
+        </div>
+        <div class="hero-row">
+          <div class="big" style="font-size:72px">${r.strokes}<small> golpes</small></div>
+          <div style="font-size:28px;font-weight:700">${vsPar(over)}</div>
+        </div>
+        ${WAVE}
+      </section>
       <section class="card"><div class="stats">${stats}</div></section>
-      <section class="card"><h2 class="card-title">Tarjeta</h2>${scorecard(r.holes || [])}${scLegend}</section>
-    </div>`;
+      <section class="card"><h2 class="card-title">Tarjeta</h2>${scorecard(r.holes || [])}${scLegend}</section>`;
   }
 
   function notFound(href, name) {
-    return `<a class="back" href="${href}">${ICON.back}${name}</a><div class="empty">No encontramos esa actividad.</div>`;
+    return `<section class="hero"><a class="back" href="${href}">${ICON.back}${name}</a>${WAVE}</section><div class="empty">No encontramos esa actividad.</div>`;
   }
 
   // ───────── router ─────────
@@ -610,12 +708,13 @@
     else if (page === 'golf') html = id ? viewRonda(id) : viewGolf();
     else html = viewResumen();
     $app.innerHTML = html;
+    const nav = ['natacion', 'golf'].includes(page) ? page : 'resumen';
     document.querySelectorAll('.tabbar a').forEach((a) => {
-      if (a.dataset.nav === (['natacion', 'golf'].includes(page) ? page : 'resumen')) a.setAttribute('aria-current', 'page');
+      if (a.dataset.nav === nav) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
-    const titles = { natacion: 'Natación', golf: 'Golf', resumen: 'Resumen' };
-    document.title = `${titles[page] || 'Resumen'} · Training Performance`;
+    document.title = `${{ natacion: 'Natación', golf: 'Golf', resumen: 'Resumen' }[nav]} · Training Performance`;
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', nav === 'golf' ? '#c8e65a' : '#ff6a1a');
     afterRender.forEach((fn) => fn());
   }
 
@@ -654,6 +753,7 @@
     if (!btn) return;
     const { act, val } = btn.dataset;
     if (act === 'env') { S.env = val; S.shown = 10; store.set('tp:env', val); }
+    if (act === 'stroke') { S.stroke = val; S.shown = 10; store.set('tp:stroke', val); }
     if (act === 'per') { S.per = val; S.shown = 10; store.set('tp:per', val); }
     if (act === 'golfPer') { S.golfPer = val; S.shown = 10; store.set('tp:golfPer', val); }
     if (act === 'golfHoles') { S.golfHoles = Number(val); store.set('tp:golfHoles', Number(val)); }

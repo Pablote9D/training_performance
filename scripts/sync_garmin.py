@@ -25,7 +25,7 @@ from typing import Any
 
 from garminconnect import Garmin
 
-from swimcalc import best_efforts
+from swimcalc import derive
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -210,13 +210,15 @@ def sync_swims(api: Garmin, full: bool) -> int:
 
     SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
     for s in sessions.values():
+        detail = SESSIONS_DIR / f"{s['id']}.json"
         intervals = s.pop("intervals", None)
-        if intervals is not None:
-            s["best"] = best_efforts(intervals)
         if intervals:
-            (SESSIONS_DIR / f"{s['id']}.json").write_text(
-                json.dumps({"id": s["id"], "intervals": intervals}, ensure_ascii=False) + "\n")
-        s["has_detail"] = (SESSIONS_DIR / f"{s['id']}.json").exists()
+            detail.write_text(json.dumps({"id": s["id"], "intervals": intervals}, ensure_ascii=False) + "\n")
+        elif detail.exists():
+            intervals = json.loads(detail.read_text()).get("intervals") or []
+        # los campos derivados se recalculan siempre, así los cambios de cálculo aplican a todo el historial
+        s.update(derive(intervals or []))
+        s["has_detail"] = detail.exists()
 
     out = sorted(sessions.values(), key=lambda s: (s["date"], s["time"]))
     save(SWIM_FILE, {"updated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "sessions": out})

@@ -3,8 +3,8 @@
 Página personal con mis métricas de **natación** (pileta y aguas abiertas) y **golf**, tomadas automáticamente de Garmin Connect (Fenix 8).
 
 - **Resumen:** anillos con los objetivos de la semana, ritmo semanal, hándicap y últimas actividades.
-- **Natación:** distancia, sesiones, ritmo y SWOLF con comparación contra el período anterior, volumen semanal o mensual, tendencias, récords personales y lista de sesiones.
-- **Detalle de sesión:** ritmo por pileta, zonas de frecuencia cardíaca e intervalos.
+- **Natación:** distancia, ritmo, SWOLF y racha con comparación contra el período anterior, volumen semanal o mensual, tendencias, récords personales y lista de sesiones. Con el selector **Crol / Todos** todo se calcula solo con las piletas de crol.
+- **Detalle de sesión:** ritmo por pileta (crol resaltado), reparto por estilo, zonas de frecuencia cardíaca e intervalos.
 - **Golf:** hándicap, promedio, mejor ronda, putts, fairways y GIR; golpes por ronda, promedio en hoyos par 3/4/5, dirección de la salida y tarjeta hoyo por hoyo.
 
 Es un sitio estático (HTML + JS, sin build). Funciona en el celular y en la PC.
