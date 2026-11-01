@@ -62,19 +62,46 @@ def best_efforts(intervals: list[dict[str, Any]], stroke: str | None = None) -> 
 
 
 def by_stroke(intervals: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
-    """Distancia, tiempo y SWOLF acumulados por estilo (solo piletas válidas)."""
+    """Por estilo (solo piletas válidas): distancia `d`, tiempo `t`, suma de SWOLF `sw`,
+    piletas con SWOLF `n` y el tiempo de esas piletas `tsw` (brazadas = sw - tsw)."""
     out: dict[str, dict[str, float]] = {}
     for it in intervals:
         for ln in it.get("lengths") or []:
             if not valid_length(ln):
                 continue
-            s = out.setdefault(ln.get("stroke") or "otro", {"d": 0.0, "t": 0.0, "sw": 0.0, "n": 0})
+            s = out.setdefault(ln.get("stroke") or "otro", {"d": 0.0, "t": 0.0, "sw": 0.0, "n": 0, "tsw": 0.0})
             s["d"] += ln["d"]
             s["t"] += ln["t"]
             if ln.get("swolf"):
                 s["sw"] += ln["swolf"]
                 s["n"] += 1
-    return {k: {"d": round(v["d"]), "t": round(v["t"], 1), "sw": round(v["sw"]), "n": int(v["n"])} for k, v in out.items()}
+                s["tsw"] += ln["t"]
+    return {k: {"d": round(v["d"]), "t": round(v["t"], 1), "sw": round(v["sw"]), "n": int(v["n"]), "tsw": round(v["tsw"], 1)}
+            for k, v in out.items()}
+
+
+def long_set_splits(intervals: list[dict[str, Any]], stroke: str = FREESTYLE, min_distance: float = 400) -> list[dict[str, Any]]:
+    """Series largas de un solo estilo: ritmo /100 m de la primera y la segunda mitad.
+
+    Sirve para ver cómo administrás el esfuerzo (split negativo = segunda mitad más rápida).
+    `i` es la posición del intervalo dentro de la sesión.
+    """
+    out = []
+    for i, it in enumerate(intervals):
+        lengths = it.get("lengths") or []
+        if it.get("kind") != "active" or len(lengths) < 8:
+            continue
+        if not all(valid_length(ln) and ln.get("stroke") == stroke for ln in lengths):
+            continue
+        dist = sum(ln["d"] for ln in lengths)
+        if dist < min_distance:
+            continue
+        half = len(lengths) // 2
+        a, b = lengths[:half], lengths[len(lengths) - half:]
+        p1 = 100 * sum(ln["t"] for ln in a) / sum(ln["d"] for ln in a)
+        p2 = 100 * sum(ln["t"] for ln in b) / sum(ln["d"] for ln in b)
+        out.append({"i": i, "d": round(dist), "p1": round(p1, 1), "p2": round(p2, 1)})
+    return out
 
 
 def derive(intervals: list[dict[str, Any]]) -> dict[str, Any]:
@@ -83,4 +110,5 @@ def derive(intervals: list[dict[str, Any]]) -> dict[str, Any]:
         "best": best_efforts(intervals),
         "best_free": best_efforts(intervals, FREESTYLE),
         "by_stroke": by_stroke(intervals),
+        "splits": long_set_splits(intervals),
     }

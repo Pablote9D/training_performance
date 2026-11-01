@@ -212,6 +212,62 @@ a.row:hover, a.row:focus-visible { background: var(--card-2); }
 
 .empty { color: var(--text-3); font-size: 13px; text-align: center; padding: 24px 0; }
 
+/* ───────── módulos de análisis ───────── */
+.big-num { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.css-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+.zone-row i { display: inline-block; width: 10px; height: 10px; border-radius: 5px; margin-right: 8px; vertical-align: 0; }
+.zone-row .big { font-size: 16px; }
+.badge { font-size: 12px; font-weight: 600; border-radius: 999px; padding: 3px 9px; background: var(--card-2); color: var(--text-2); white-space: nowrap; }
+.badge.good { background: rgba(127, 227, 160, .16); color: var(--good); }
+.badge.bad { background: rgba(255, 154, 138, .16); color: var(--bad); }
+.split-note { font-size: 12px; color: var(--text-2); padding: 0 0 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.meter { height: 10px; border-radius: 5px; background: var(--card-2); overflow: hidden; }
+.meter span { display: block; height: 100%; border-radius: 5px; background: var(--buoy); }
+.race-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.race-days { font-size: 15px; color: var(--text-2); margin-top: 4px; }
+.race-days b { font-size: 34px; color: var(--buoy); font-weight: 700; letter-spacing: -0.02em; }
+.race-pred { text-align: right; }
+.race-pred .big-num { color: var(--buoy); }
+.race-form { display: flex; flex-direction: column; gap: 10px; }
+.race-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-2); }
+.race-form input { font: inherit; color: var(--text); background: var(--card-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 44px; width: 100%; color-scheme: dark; }
+.race-form input:focus { outline: 2px solid var(--buoy); outline-offset: 0; }
+.form-actions { display: flex; gap: 8px; }
+.btn { border: 0; border-radius: 999px; padding: 10px 18px; min-height: 44px; font-weight: 700; background: var(--buoy); color: var(--buoy-ink); cursor: pointer; }
+.btn.ghost { background: var(--card-2); color: var(--text); }
+.link { border: 0; background: none; color: var(--buoy); font-weight: 600; font-size: 13px; cursor: pointer; min-height: 32px; padding: 0 4px; }
+code { font-size: .92em; background: var(--card-2); padding: 1px 5px; border-radius: 5px; }
+
+.heat { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; }
+.heat .hc { aspect-ratio: 1; border-radius: 3px; background: var(--card-2); }
+.heat .hc.swim { background: var(--buoy); }
+.heat .hc.golf { background: var(--golf); }
+.heat .hc.both { background: linear-gradient(135deg, var(--buoy) 50%, var(--golf) 50%); }
+.heat .hc.fut { background: transparent; }
+.heat .hc[data-tip] { cursor: pointer; }
+.heat .hc.on { outline: 2px solid var(--text); }
+
+.holes { display: flex; flex-direction: column; gap: 6px; }
+.hole { display: grid; grid-template-columns: 26px 44px minmax(0, 1fr) 44px; gap: 8px; align-items: center; font-size: 13px; cursor: pointer; }
+.hole .hn { font-weight: 700; font-size: 15px; }
+.hole .hbar { height: 10px; background: var(--card-2); border-radius: 5px; overflow: hidden; }
+.hole .hbar span { display: block; height: 100%; border-radius: 5px; }
+.hole .hv { text-align: right; font-weight: 600; }
+
+.split-bar.tall { height: 22px; border-radius: 8px; }
+.split-bar span[data-tip] { cursor: pointer; }
+.goal-dots { display: flex; flex-wrap: wrap; gap: 6px; }
+.goal-dots span { min-width: 36px; height: 30px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: var(--card-2); color: var(--text-2); cursor: pointer; }
+.goal-dots span.ok { background: var(--golf); color: var(--golf-ink); }
+
+.club { display: grid; grid-template-columns: 84px minmax(0, 1fr) 54px; gap: 10px; align-items: center; padding: 6px 0; font-size: 13px; cursor: pointer; }
+.club .cn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.club .cbar { position: relative; height: 12px; }
+.club .cbar span { position: absolute; left: 0; top: 0; height: 100%; border-radius: 6px; }
+.club .cbar .mx { background: var(--card-2); }
+.club .cbar .av { background: var(--golf); }
+.club .cv { text-align: right; font-weight: 700; }
+
 /* ───────── tooltip ───────── */
 .tip { position: fixed; z-index: 20; pointer-events: none; background: var(--text); color: var(--bg); border-radius: 10px; padding: 8px 10px; font-size: 12px; line-height: 1.35; box-shadow: 0 6px 20px rgba(0, 0, 0, .4); max-width: 220px; }
 .tip b { font-weight: 700; }

@@ -34,6 +34,7 @@
     golfPer: store.get('tp:golfPer', '3M'),
     golfHoles: store.get('tp:golfHoles', null),
     shown: 10,
+    editRace: false,
   };
   let afterRender = [];
 
@@ -254,19 +255,281 @@
     return `<p class="hint" style="text-align:center">Actualizado ${d.toLocaleString('es-AR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>`;
   }
 
-  function raceCard() {
-    const c = S.cfg.proxima_carrera || {};
-    if (!c.nombre || !c.fecha) return '';
-    const days = Math.round((parseD(c.fecha) - today()) / 864e5);
-    if (days < 0) return '';
-    return `<section class="race wide">
-      <div>
-        <div class="hint" style="text-transform:uppercase;letter-spacing:.08em">Próxima carrera</div>
-        <div style="font-size:17px;font-weight:600">${esc(c.nombre)}</div>
-        <div class="muted">${shortDate(c.fecha)}${c.distancia_m ? ` · ${meters(c.distancia_m)}` : ''}</div>
+  // ───────── natación: ritmos, carrera, eficiencia, series largas ─────────
+  const bestT = (v) => (v == null ? null : typeof v === 'number' ? v : v.t);
+  /** Mejores tiempos de crol (de corrido) entre las sesiones dadas: { "400": { t, s } } */
+  function freeBests(sessions) {
+    const out = {};
+    for (const s of sessions) {
+      for (const [d, v] of Object.entries(s.best_free || {})) {
+        const t = bestT(v);
+        if (t && (!out[d] || t < out[d].t)) out[d] = { t, s };
+      }
+    }
+    return out;
+  }
+  const poolUntil = (ref, days) => S.swim.sessions.filter((s) => s.env === 'pool' && parseD(s.date) <= ref && (!days || parseD(s.date) > addDays(ref, -days)));
+
+  /** CSS (velocidad crítica de nado) = (T400 − T200) / 2, en s cada 100 m. */
+  function cssCalc(ref = today()) {
+    let b = freeBests(poolUntil(ref, 90)), recent = true;
+    if (!b['200'] || !b['400']) { b = freeBests(poolUntil(ref, 0)); recent = false; }
+    if (!b['200'] || !b['400']) return null;
+    const css = (b['400'].t - b['200'].t) / 2;
+    return css > 0 ? { css, b200: b['200'], b400: b['400'], recent } : null;
+  }
+
+  const OW_FACTOR = 1.05; // aguas abiertas: sin paredes ni vueltas, orientación, oleaje
+  /** Pronóstico de carrera (fórmula de Riegel) con el esfuerzo de referencia más largo de los últimos 90 días. */
+  function predict(dist, ref = today()) {
+    const b = freeBests(poolUntil(ref, 90));
+    const key = ['1500', '800', '400', '200'].find((k) => b[k]);
+    if (!key || !dist) return null;
+    const pool = b[key].t * Math.pow(dist / Number(key), 1.06);
+    return { pool, ow: pool * OW_FACTOR, ref: key, refT: b[key].t, refS: b[key].s };
+  }
+
+  function currentRace() {
+    const local = store.get('tp:race', null);
+    const c = local || S.cfg.proxima_carrera || {};
+    return c.nombre && c.fecha ? { nombre: c.nombre, fecha: c.fecha, distancia_m: Number(c.distancia_m) || null } : null;
+  }
+
+  function raceForm(r) {
+    return `<form class="race-form" data-form="race">
+      <label>Nombre<input name="nombre" required value="${esc(r?.nombre || '')}" placeholder="Ej.: Cruce del lago"></label>
+      <div class="cols">
+        <label>Fecha<input name="fecha" type="date" required value="${esc(r?.fecha || '')}"></label>
+        <label>Distancia (m)<input name="distancia_m" type="number" min="100" step="50" required value="${esc(r?.distancia_m || '')}" placeholder="1500"></label>
       </div>
-      <div><div class="n num">${days === 0 ? '¡Hoy!' : days}</div>${days ? `<div class="muted" style="text-align:right">${days === 1 ? 'día' : 'días'}</div>` : ''}</div>
+      <div class="form-actions">
+        <button type="submit" class="btn">Guardar</button>
+        ${r ? '<button type="button" class="btn ghost" data-act="raceCancel">Cancelar</button>' : ''}
+      </div>
+      <div class="hint">Se guarda en este dispositivo. Para que aparezca en todos, cargala en <code>config.json</code>.</div>
+    </form>`;
+  }
+
+  /** Tarjeta de la próxima carrera: cuenta regresiva, pronóstico, volumen sugerido y evolución. */
+  function raceCard(compact = false) {
+    const r = currentRace();
+    if (compact) {
+      if (!r) return '';
+      const days = Math.round((parseD(r.fecha) - today()) / 864e5);
+      if (days < 0) return '';
+      const p = predict(r.distancia_m);
+      return `<a class="race wide" href="#/natacion" style="color:inherit">
+        <div><div class="hint" style="text-transform:uppercase;letter-spacing:.08em">Próxima carrera</div>
+          <div style="font-size:17px;font-weight:600">${esc(r.nombre)}</div>
+          <div class="muted">${shortDate(r.fecha)}${r.distancia_m ? ` · ${meters(r.distancia_m)}` : ''}${p ? ` · pronóstico ${clock(p.ow)}` : ''}</div></div>
+        <div><div class="n num">${days === 0 ? '¡Hoy!' : days}</div>${days ? `<div class="muted" style="text-align:right">${days === 1 ? 'día' : 'días'}</div>` : ''}</div>
+      </a>`;
+    }
+    if (S.editRace || !r) {
+      return `<section class="card wide race-card">
+        <div class="card-head"><h2 class="card-title">${r ? 'Editar carrera' : 'Tu próxima carrera'}</h2></div>
+        ${r ? '' : '<div class="muted">Cargala y te muestro un pronóstico de tiempo, cuánto volumen te conviene y cómo venís.</div>'}
+        ${raceForm(r)}
+      </section>`;
+    }
+    const days = Math.round((parseD(r.fecha) - today()) / 864e5);
+    const p = predict(r.distancia_m);
+    // volumen de crol de esta semana vs. sugerido (~3 veces la distancia de la carrera)
+    const ws = monday(today());
+    const weekKm = S.swim.sessions.filter((s) => parseD(s.date) >= ws).reduce((a, s) => a + metrics(s, true).d, 0) / 1000;
+    const targetKm = (3 * r.distancia_m) / 1000;
+    // evolución del pronóstico, semana a semana
+    const pts = [];
+    for (let i = 9; i >= 0; i--) {
+      const end = addDays(monday(today()), -7 * i + 6);
+      const q = predict(r.distancia_m, end > today() ? today() : end);
+      if (q) pts.push({ v: q.ow, label: `semana del ${shortDate(isoD(addDays(end, -6)))}` });
+    }
+    return `<section class="card wide race-card">
+      <div class="card-head">
+        <h2 class="card-title">${esc(r.nombre)}</h2>
+        <button type="button" class="link" data-act="raceEdit">Editar</button>
+      </div>
+      <div class="race-top">
+        <div><div class="muted">${cap(parseD(r.fecha).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' }))}${r.distancia_m ? ` · ${meters(r.distancia_m)}` : ''}</div>
+          ${days >= 0 ? `<div class="race-days"><b>${days}</b> ${days === 1 ? 'día' : 'días'}</div>` : '<div class="muted">Ya pasó: cargá la próxima.</div>'}</div>
+        ${p ? `<div class="race-pred"><div class="muted">Si fuera hoy</div><div class="big-num">${clock(p.ow)}</div><div class="hint">en pileta ${clock(p.pool)}</div></div>` : ''}
+      </div>
+      ${p ? `<div class="hint">Estimado con tu mejor ${p.ref} m de crol de los últimos 90 días (${clock(p.refT)}, ${shortDate(p.refS.date)}), +5% por nadar sin paredes y orientándote.</div>` : '<div class="hint">Para el pronóstico necesito un 200 m o más de crol nadado de corrido en los últimos 90 días.</div>'}
+      <div class="stack" style="gap:6px">
+        <div class="card-head"><span class="muted">Crol esta semana</span><span class="muted"><b style="color:var(--text)">${nf(weekKm, 1)}</b> / ${nf(targetKm, 1)} km sugeridos</span></div>
+        <div class="meter"><span style="width:${Math.min(100, (100 * weekKm) / (targetKm || 1))}%"></span></div>
+        <div class="hint">Referencia: unas 3 veces la distancia de la carrera por semana.</div>
+      </div>
+      ${pts.length >= 2 ? `<div class="stack" style="gap:4px"><div class="muted">Pronóstico semana a semana</div>${spark(pts, { color: 'var(--buoy)', fmt: (v) => clock(v), height: 56, label: 'Evolución del pronóstico de carrera' })}</div>` : ''}
     </section>`;
+  }
+
+  const ZONES = [
+    ['Velocidad', 'series cortas, muy rápido', -Infinity, -2, 'var(--z5)'],
+    ['Umbral', 'el ritmo de tu CSS', -2, 3, 'var(--z4)'],
+    ['Tempo', 'ritmo de carrera larga', 3, 8, 'var(--z3)'],
+    ['Aeróbico', 'base, volumen', 8, 15, 'var(--z2)'],
+    ['Recuperación', 'suave, técnica', 15, Infinity, 'var(--z1)'],
+  ];
+  function paceCard() {
+    const c = cssCalc();
+    if (!c) return `<section class="card"><h2 class="card-title">Tus ritmos</h2><div class="empty">Necesito un 200 y un 400 de crol nadados de corrido para calcularlos.</div></section>`;
+    const rng = (lo, hi) => (lo === -Infinity ? `< ${clock(c.css + hi)}` : hi === Infinity ? `> ${clock(c.css + lo)}` : `${clock(c.css + lo)}–${clock(c.css + hi)}`);
+    return `<section class="card">
+      <div class="card-head"><h2 class="card-title">Tus ritmos de crol</h2><span class="muted">/100 m</span></div>
+      <div class="css-head"><div><div class="muted">CSS · ritmo umbral</div><div class="big-num">${clock(c.css)}</div></div>
+        <div class="hint" style="text-align:right">Con tu mejor 400 (${clock(c.b400.t)}) y 200 (${clock(c.b200.t)})<br>${c.recent ? 'de los últimos 90 días' : 'históricos'}</div></div>
+      <div>${ZONES.map(([n, desc, lo, hi, col]) => `<div class="list-row zone-row"><span><i style="background:${col}"></i>${n} <span class="hint">${desc}</span></span><span class="big">${rng(lo, hi)}</span></div>`).join('')}</div>
+    </section>`;
+  }
+
+  /** Brazadas por pileta de crol (ciclos del brazo con reloj), llevadas a 25 m. */
+  function spl(s) {
+    const b = s.by_stroke && s.by_stroke[FREE];
+    if (!b || !b.n || b.n < 8 || b.tsw == null) return null;
+    const v = ((b.sw - b.tsw) / b.n) * (25 / (s.pool_m || 25));
+    return v > 0 ? v : null;
+  }
+  function efficiencyCard(cur, prev) {
+    const xs = cur.filter(spl), ys = prev.filter(spl);
+    const avg = (arr) => (arr.length ? arr.reduce((a, s) => a + spl(s), 0) / arr.length : null);
+    const a = avg(xs), b = avg(ys);
+    return `<section class="card">
+      <div class="card-head"><h2 class="card-title">Brazadas por pileta</h2><span class="hint">crol · menos = más eficiente</span></div>
+      <div class="css-head"><div class="big-num">${a ? nf(a, 1) : '—'}</div>${b && a ? delta(a, b, (v) => nf(v, 1), 'down') : ''}</div>
+      ${spark(xs.map((s) => ({ v: spl(s), label: shortDate(s.date) })), { color: 'var(--teal)', fmt: (v) => `${nf(v, 1)} brazadas`, height: 56, label: 'Brazadas por pileta de crol por sesión' })}
+      <div class="hint">Ciclos del brazo con el reloj en cada pileta de 25 m. Si bajan sin perder ritmo, estás avanzando más por brazada.</div>
+    </section>`;
+  }
+
+  function splitLabel(p1, p2) {
+    const d = p2 - p1;
+    if (Math.abs(d) <= 1.5) return { cls: '', txt: 'parejo' };
+    return d < 0 ? { cls: 'good', txt: `negativo ${nf(-d)} s` } : { cls: 'bad', txt: `te caés ${nf(d)} s` };
+  }
+  function pacingCard(cur) {
+    const sets = cur.flatMap((s) => (s.splits || []).map((x) => ({ ...x, s }))).reverse();
+    if (!sets.length) return `<section class="card"><h2 class="card-title">Series largas</h2><div class="empty">Sin series de crol de 400 m o más en este período.</div></section>`;
+    const cnt = { neg: 0, even: 0, pos: 0 };
+    for (const x of sets) { const d = x.p2 - x.p1; if (Math.abs(d) <= 1.5) cnt.even++; else if (d < 0) cnt.neg++; else cnt.pos++; }
+    return `<section class="card">
+      <div class="card-head"><h2 class="card-title">Series largas</h2><span class="hint">crol, 400 m o más</span></div>
+      <div class="muted">De ${sets.length}: <b style="color:var(--good)">${cnt.neg} en negativo</b>, ${cnt.even} ${cnt.even === 1 ? 'pareja' : 'parejas'}, <b style="color:var(--bad)">${cnt.pos} cayéndote</b> en la segunda mitad.</div>
+      <div>${sets.slice(0, 5).map((x) => { const l = splitLabel(x.p1, x.p2); return `<a class="list-row" href="#/natacion/${x.s.id}"><span>${shortDate(x.s.date)} · ${nf(x.d)} m</span><span class="muted num">${clock(x.p1)} → ${clock(x.p2)}</span><span class="badge ${l.cls}">${l.txt}</span></a>`; }).join('')}</div>
+      <div class="hint">Ritmo /100 m de la primera mitad contra la segunda. En aguas abiertas, terminar igual o más rápido es oro.</div>
+    </section>`;
+  }
+
+  // ───────── calendario de actividad ─────────
+  function heatmap(weeks = 26) {
+    const start = addDays(monday(today()), -7 * (weeks - 1));
+    const days = new Map();
+    const add = (d, k, txt) => { const e = days.get(d) || { swim: 0, golf: 0, t: [] }; e[k]++; e.t.push(txt); days.set(d, e); };
+    for (const s of S.swim.sessions) add(s.date, 'swim', `Natación ${meters(s.distance_m)}`);
+    for (const r of S.golf.rounds) add(r.date, 'golf', `Golf ${r.strokes} golpes`);
+    let cells = '', active = 0;
+    for (let w = 0; w < weeks; w++) {
+      for (let d = 0; d < 7; d++) {
+        const day = addDays(start, 7 * w + d);
+        const key = isoD(day);
+        const e = days.get(key);
+        const future = day > today();
+        if (e && !future) active++;
+        const cls = future ? 'fut' : !e ? '' : e.swim && e.golf ? 'both' : e.swim ? 'swim' : 'golf';
+        cells += `<span class="hc ${cls}" ${e ? `data-tip="${esc(`${shortDate(key)}\n${e.t.join('\n')}`)}"` : ''}></span>`;
+      }
+    }
+    return `<section class="card">
+      <div class="card-head"><h2 class="card-title">Constancia</h2><span class="muted">${active} días activos en 6 meses</span></div>
+      <div class="heat" role="img" aria-label="Calendario de los últimos 6 meses: ${active} días con actividad">${cells}</div>
+      <div class="legend"><span><i style="background:var(--buoy)"></i>Natación</span><span><i style="background:var(--golf)"></i>Golf</span><span><i style="background:linear-gradient(135deg,var(--buoy) 50%,var(--golf) 50%)"></i>Ambos</span><span>columnas = semanas, filas = lun a dom</span></div>
+    </section>`;
+  }
+
+  // ───────── golf: tu cancha, armado del score, palos, hándicap ─────────
+  function courseCard(cur) {
+    const counts = {};
+    for (const r of cur) counts[r.course] = (counts[r.course] || 0) + 1;
+    const course = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+    if (!course) return '';
+    const holes = {};
+    for (const r of cur.filter((x) => x.course === course)) {
+      for (const h of r.holes || []) {
+        if (!h.par) continue;
+        const e = holes[h.n] || (holes[h.n] = { n: h.n, par: h.par, sum: 0, k: 0 });
+        e.sum += h.strokes; e.k++;
+      }
+    }
+    const list = Object.values(holes).sort((a, b) => a.n - b.n).map((h) => ({ ...h, avg: h.sum / h.k, over: h.sum / h.k - h.par }));
+    if (!list.length) return '';
+    const max = Math.max(...list.map((h) => h.over), 1);
+    // mejor y peor hoyo: solo entre los jugados al menos 2 veces (si hay), para no sacar conclusiones de una sola vez
+    const pool = list.filter((h) => h.k >= 2).length ? list.filter((h) => h.k >= 2) : list;
+    const worst = [...pool].sort((a, b) => b.over - a.over)[0], best = [...pool].sort((a, b) => a.over - b.over)[0];
+    const sgn = (v) => `${v >= 0 ? '+' : '−'}${nf(Math.abs(v), 1)}`;
+    return `<section class="card">
+      <div class="card-head"><h2 class="card-title" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(course)}</h2><span class="muted" style="flex-shrink:0">${counts[course]} ${counts[course] === 1 ? 'ronda' : 'rondas'}</span></div>
+      <div class="muted">El más difícil: <b style="color:var(--text)">hoyo ${worst.n}</b> (${sgn(worst.over)} prom.). El que mejor jugás: <b style="color:var(--text)">hoyo ${best.n}</b> (${sgn(best.over)}).</div>
+      <div class="holes">${list.map((h) => `<div class="hole" data-tip="${esc(`Hoyo ${h.n} · par ${h.par}\nPromedio ${nf(h.avg, 1)} (${sgn(h.over)})\n${h.k} ${h.k === 1 ? 'vez' : 'veces'}`)}">
+        <span class="hn">${h.n}</span><span class="hint">par ${h.par}</span>
+        <span class="hbar"><span style="width:${Math.max(4, (100 * Math.max(0, h.over)) / max)}%;background:${h === worst ? 'var(--buoy)' : 'var(--sand)'}"></span></span>
+        <span class="hv num">${sgn(h.over)}</span></div>`).join('')}</div>
+      <div class="hint">Golpes sobre el par en promedio, por hoyo.</div>
+    </section>`;
+  }
+
+  const SCORE_CATS = [
+    ['Birdie o mejor', (d) => d <= -1, 'var(--golf)'],
+    ['Par', (d) => d === 0, 'var(--teal)'],
+    ['Bogey', (d) => d === 1, 'var(--sand)'],
+    ['Doble', (d) => d === 2, 'var(--buoy)'],
+    ['Triple o peor', (d) => d >= 3, 'var(--z5)'],
+  ];
+  function scoringCard(cur, ht) {
+    const holes = cur.flatMap((r) => (r.holes || []).filter((h) => h.par));
+    if (!holes.length) return '';
+    const counts = SCORE_CATS.map(([n, f, c]) => ({ n, c, k: holes.filter((h) => f(h.strokes - h.par)).length }));
+    const threePutts = holes.filter((h) => h.putts >= 3).length;
+    const goal = (S.cfg.objetivos || {})[`golf_golpes_${ht}`] || (ht === 9 ? 50 : 100);
+    const full = cur.filter(fullRound);
+    const under = full.filter((r) => r.strokes < goal);
+    return `<section class="card">
+      <div class="card-head"><h2 class="card-title">Cómo se arma tu score</h2><span class="muted">${holes.length} hoyos</span></div>
+      <div class="split-bar tall" role="img" aria-label="${counts.map((x) => `${x.n} ${Math.round((100 * x.k) / holes.length)}%`).join(', ')}">${counts.filter((x) => x.k).map((x) => `<span style="flex:${x.k} 1 0;background:${x.c}" data-tip="${esc(`${x.n}\n${x.k} hoyos (${Math.round((100 * x.k) / holes.length)}%)`)}"></span>`).join('')}</div>
+      <div class="legend">${counts.map((x) => `<span><i style="background:${x.c}"></i>${x.n} ${Math.round((100 * x.k) / holes.length)}%</span>`).join('')}</div>
+      <div class="cols">
+        <div class="par-box"><div class="muted">3 putts</div><div class="v">${threePutts}</div><div class="hint">${cur.length ? `${nf(threePutts / cur.length, 1)} por ronda` : ''}</div></div>
+        <div class="par-box"><div class="muted">Objetivo: &lt; ${goal}</div><div class="v">${under.length}/${full.length}</div><div class="hint">rondas de ${ht} logradas</div></div>
+      </div>
+      ${full.length ? `<div class="goal-dots" aria-label="Últimas rondas contra el objetivo">${full.slice(-10).map((r) => `<span class="${r.strokes < goal ? 'ok' : ''}" data-tip="${esc(`${shortDate(r.date)}\n${r.strokes} golpes`)}">${r.strokes}</span>`).join('')}</div>` : ''}
+      <div class="hint">Objetivo editable en <code>config.json</code> (<code>golf_golpes_${ht}</code>).</div>
+    </section>`;
+  }
+
+  function clubsCard() {
+    const clubs = S.golf.clubs;
+    if (clubs === undefined) return `<section class="card"><h2 class="card-title">Distancias por palo</h2><div class="empty">Aparecen después de la próxima sincronización con Garmin.</div></section>`;
+    if (!clubs.length) return `<section class="card"><h2 class="card-title">Distancias por palo</h2><div class="empty">Garmin todavía no tiene distancias por palo. Se arman cuando el reloj registra golpes con el palo identificado.</div></section>`;
+    const max = Math.max(...clubs.map((c) => c.max_m || c.avg_m));
+    return `<section class="card">
+      <div class="card-head"><h2 class="card-title">Distancias por palo</h2><span class="muted">promedio · máx.</span></div>
+      <div>${clubs.map((c) => `<div class="club" data-tip="${esc(`${c.name}\nPromedio ${c.avg_m} m${c.max_m ? `\nMáximo ${c.max_m} m` : ''}${c.shots ? `\n${c.shots} golpes` : ''}`)}">
+        <span class="cn">${esc(c.name)}</span>
+        <span class="cbar"><span class="mx" style="width:${(100 * (c.max_m || c.avg_m)) / max}%"></span><span class="av" style="width:${(100 * c.avg_m) / max}%"></span></span>
+        <span class="cv num">${c.avg_m} m</span></div>`).join('')}</div>
+    </section>`;
+  }
+
+  function handicapCard() {
+    const h = S.golf.handicap_history || [];
+    if (h.length >= 2) {
+      return `<section class="card"><div class="card-head"><h2 class="card-title">Hándicap</h2><span class="muted">más abajo = mejor</span></div>
+        ${spark(h.map((x) => ({ v: x.value, label: shortDate(x.date) })), { color: 'var(--golf)', fmt: (v) => nf(v, 1), height: 56, label: 'Evolución del hándicap' })}</section>`;
+    }
+    if (S.golf.handicap == null) return '';
+    return `<section class="card"><div class="card-head"><h2 class="card-title">Hándicap</h2><span class="big">${nf(S.golf.handicap, 1)}</span></div>
+      <div class="hint">La curva se arma sola: guardo un punto cada vez que Garmin actualiza tu hándicap.</div></section>`;
   }
 
   // ───────── vista: resumen ─────────
@@ -304,7 +567,7 @@
         ${WAVE}
       </section>
       ${sampleBanner()}
-      ${raceCard()}
+      ${raceCard(true)}
       <section class="cols">
         ${kpi('Ritmo crol, semana', a.pace ? clock(a.pace) : '—', '/100m', delta(a.pace, b.pace, (v) => `${Math.round(v)} s`, 'down', 'vs. sem. pasada'))}
         ${golfCard}
@@ -313,6 +576,7 @@
         <h2 class="section-title">Últimas actividades</h2>
         ${latest.map((x) => x.html).join('') || '<div class="empty">Todavía no hay actividades</div>'}
       </section>
+      ${heatmap()}
       ${updatedLine()}`;
   }
 
@@ -429,6 +693,7 @@
       <div class="split">
         ${raceCard()}
         ${volumeChart(rows)}
+        ${pool ? paceCard() : ''}
         <section class="card">
           <div class="card-head"><h2 class="card-title">Ritmo /100 m</h2><span class="hint">más abajo = más rápido</span></div>
           ${paceSpark}
@@ -438,6 +703,8 @@
           ${swolfSpark}
           <div class="hint">Segundos + brazadas en cada pileta.</div>
         </section>` : ''}
+        ${pool ? pacingCard(cur) : ''}
+        ${pool ? efficiencyCard(cur, prev) : ''}
         ${pool ? prCard(rows) : ''}
         <section class="stack ${pool ? '' : 'wide'}">
           <h2 class="section-title">Sesiones</h2>
@@ -522,10 +789,14 @@
     let tableHtml = '';
     if (intervals.length) {
       let n = 0;
-      const rowsHtml = intervals.map((it) => {
+      const splitsByIdx = new Map((s.splits || []).map((x) => [x.i, x]));
+      const rowsHtml = intervals.map((it, idx) => {
         if (it.kind === 'rest') return `<div class="rest">Descanso ${clock(it.duration_s)}</div>`;
         n++;
-        return `<div class="tr ${it.stroke === FREE ? 'free' : ''}"><span class="name">${n}. ${nf(it.distance_m)} ${esc(strokeName(it.stroke))}</span><span>${clock(it.duration_s)}</span><span>${clock(pace(it.duration_s, it.distance_m))}</span><span>${it.swolf || '—'}</span></div>`;
+        const sp = splitsByIdx.get(idx);
+        const spl = sp ? splitLabel(sp.p1, sp.p2) : null;
+        const note = sp ? `<div class="split-note">1ª mitad ${clock(sp.p1)} → 2ª ${clock(sp.p2)} <span class="badge ${spl.cls}">${spl.txt}</span></div>` : '';
+        return `<div class="tr ${it.stroke === FREE ? 'free' : ''}"><span class="name">${n}. ${nf(it.distance_m)} ${esc(strokeName(it.stroke))}</span><span>${clock(it.duration_s)}</span><span>${clock(pace(it.duration_s, it.distance_m))}</span><span>${it.swolf || '—'}</span></div>` + note;
       }).join('');
       tableHtml = `<section class="card wide">
         <h2 class="card-title">Intervalos</h2>
@@ -643,6 +914,8 @@
           <div class="card-head"><h2 class="card-title">Golpes por ronda</h2><span class="hint">${ht} hoyos · más abajo = mejor</span></div>
           ${scoreSpark}
         </section>
+        ${scoringCard(cur, ht)}
+        ${courseCard(cur)}
         <section class="card">
           <h2 class="card-title">Dónde se van los golpes</h2>
           <div class="cols-3">${parBoxes}</div>
@@ -653,6 +926,8 @@
           ${scorecard(last.holes || [])}
           ${scLegend}
         </section>` : ''}
+        ${clubsCard()}
+        ${handicapCard()}
         <section class="stack wide">
           <h2 class="section-title">Rondas</h2>
           ${list.slice(0, S.shown).map(golfRow).join('') || '<div class="empty">No hay rondas en este período</div>'}
@@ -760,6 +1035,17 @@
     if (act === 'golfPer') { S.golfPer = val; S.shown = 10; store.set('tp:golfPer', val); }
     if (act === 'golfHoles') { S.golfHoles = Number(val); store.set('tp:golfHoles', Number(val)); }
     if (act === 'more') S.shown += 20;
+    if (act === 'raceEdit') S.editRace = true;
+    if (act === 'raceCancel') S.editRace = false;
+    render();
+  });
+  document.addEventListener('submit', (e) => {
+    const form = e.target.closest('[data-form="race"]');
+    if (!form) return;
+    e.preventDefault();
+    const f = new FormData(form);
+    store.set('tp:race', { nombre: String(f.get('nombre')).trim(), fecha: String(f.get('fecha')), distancia_m: Number(f.get('distancia_m')) });
+    S.editRace = false;
     render();
   });
   addEventListener('scroll', () => tipEl && hideTip(), { passive: true });

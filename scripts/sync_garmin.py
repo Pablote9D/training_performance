@@ -326,6 +326,55 @@ def parse_round(api: Garmin, summary: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
+CLUB_TYPES = {  # nombres por si Garmin no manda el nombre del palo
+    1: "Driver", 2: "Madera 3", 3: "Madera 5", 4: "Madera 7", 5: "Híbrido 2", 6: "Híbrido 3",
+    7: "Híbrido 4", 8: "Híbrido 5", 9: "Híbrido 6", 10: "Hierro 2", 11: "Hierro 3", 12: "Hierro 4",
+    13: "Hierro 5", 14: "Hierro 6", 15: "Hierro 7", 16: "Hierro 8", 17: "Hierro 9", 18: "PW",
+    19: "GW", 20: "SW", 21: "LW", 22: "Putter",
+}
+
+
+def _find_num(d: dict[str, Any], must: tuple[str, ...], avoid: tuple[str, ...] = ()) -> float | None:
+    """Primer valor numérico cuya clave contiene todas las palabras de `must` (en cualquier nivel)."""
+    for k, v in _walk(d):
+        kl = k.lower()
+        if isinstance(v, (int, float)) and not isinstance(v, bool) and all(m in kl for m in must) and not any(a in kl for a in avoid):
+            return float(v)
+    return None
+
+
+def parse_clubs(raw: Any) -> list[dict[str, Any]]:
+    """Distancia promedio y máxima por palo, a partir de la respuesta de Garmin (formato no documentado)."""
+    items = raw if isinstance(raw, list) else next((v for _, v in _walk(raw) if isinstance(v, list) and v and isinstance(v[0], dict)), [])
+    if items:
+        print("  estructura de un palo: " + json.dumps(_shape(items[0]), ensure_ascii=False)[:1500])
+    clubs = []
+    for c in items:
+        if c.get("retired") or c.get("deleted"):
+            continue
+        avg = _find_num(c, ("average", "distance")) or _find_num(c, ("avg", "distance"))
+        mx = _find_num(c, ("max", "distance")) or _find_num(c, ("longest",))
+        shots = _find_num(c, ("shot",), ("distance",)) or _find_num(c, ("count",))
+        if not avg:
+            continue
+        # Garmin suele informar distancias en centímetros
+        scale = 0.01 if avg > 1000 else 1
+        type_id = c.get("clubTypeId") or (c.get("clubType") or {}).get("id")
+        name = c.get("name") or c.get("clubName") or (c.get("clubType") or {}).get("name") or CLUB_TYPES.get(type_id) or f"Palo {type_id}"
+        if "putter" in str(name).lower():
+            continue
+        clubs.append({
+            "name": str(name),
+            "type": type_id,
+            "avg_m": round(avg * scale),
+            "max_m": round(mx * scale) if mx else None,
+            "shots": int(shots) if shots else None,
+        })
+    clubs.sort(key=lambda x: -x["avg_m"])
+    print(f"  {len(clubs)} palos con distancia")
+    return clubs
+
+
 def sync_golf(api: Garmin, full: bool) -> int:
     data = load(GOLF_FILE, "rounds")
     # las rondas sin par se vuelven a leer (versiones anteriores del script no lo encontraban)
@@ -369,10 +418,23 @@ def sync_golf(api: Garmin, full: bool) -> int:
     except Exception as e:  # noqa: BLE001
         print(f"  hándicap no disponible: {e}")
 
+    # historial del hándicap: un punto cada vez que cambia
+    history = list(data.get("handicap_history") or [])
+    if handicap is not None and (not history or history[-1]["value"] != handicap):
+        history.append({"date": dt.date.today().isoformat(), "value": handicap})
+
+    clubs = data.get("clubs") or []
+    try:
+        clubs = parse_clubs(api.get_golf_club_stats()) or clubs
+    except Exception as e:  # noqa: BLE001
+        print(f"  distancias por palo no disponibles: {e}")
+
     out = sorted(rounds.values(), key=lambda r: (r["date"], r["time"]))
     save(GOLF_FILE, {
         "updated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "handicap": handicap,
+        "handicap_history": history,
+        "clubs": clubs,
         "rounds": out,
     })
     print(f"Golf: {new} nuevas, {len(out)} en total")
