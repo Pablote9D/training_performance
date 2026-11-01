@@ -5,7 +5,9 @@ Página personal con mis métricas de **natación** (pileta y aguas abiertas) y 
 - **Resumen:** anillos con los objetivos de la semana, ritmo semanal, hándicap y últimas actividades.
 - **Natación:** distancia, ritmo, SWOLF y racha con comparación contra el período anterior, volumen semanal o mensual, tendencias, récords personales y lista de sesiones. Con el selector **Crol / Todos** todo se calcula solo con las piletas de crol.
 - **Detalle de sesión:** ritmo por pileta (crol resaltado), reparto por estilo, zonas de frecuencia cardíaca e intervalos.
-- **Golf:** hándicap, promedio, mejor ronda, putts, fairways y GIR; golpes por ronda, promedio en hoyos par 3/4/5, dirección de la salida y tarjeta hoyo por hoyo.
+- **Natación, análisis:** ritmo umbral (CSS) y ritmos de entrenamiento por zona, próxima carrera con pronóstico de tiempo y volumen sugerido, ritmo por mitades en series largas de crol y brazadas por pileta.
+- **Resumen:** calendario de constancia de los últimos 6 meses.
+- **Golf:** hándicap y su evolución, promedio, mejor ronda, putts, fairways y GIR; golpes por ronda, cómo se arma tu score (birdies, pares, bogeys…), objetivo de golpes, tu cancha hoyo por hoyo, distancias por palo y tarjeta de cada ronda.
 
 Es un sitio estático (HTML + JS, sin build). Funciona en el celular y en la PC.
 
@@ -66,18 +68,30 @@ Si falla al hacer `git push`, revisá **Settings → Actions → General → Wor
 
 Queda en `https://<tu-usuario>.github.io/training_performance/`. En el celular, desde el navegador, usá *Agregar a pantalla de inicio* para abrirla como app.
 
+## Ambientes: prod y dev
+
+| Ambiente | Rama | Dirección |
+|---|---|---|
+| **Prod** | `main` | `https://<tu-usuario>.github.io/training_performance/` |
+| **Dev** | `dev` | `https://<tu-usuario>.github.io/training_performance/dev/` |
+
+- Los cambios se hacen en `dev` y se prueban en `/dev/`, que muestra un distintivo **DEV** rosa. Cuando están bien, se pasan a `main` con un pull request.
+- Dev usa los mismos datos reales que prod: la sincronización con Garmin escribe solo en `main`, y al publicar se copian a `/dev/`.
+- Lo publica `.github/workflows/deploy.yml`, que arma un único sitio (prod en la raíz y dev en `/dev/`). Corre al cambiar `main`, después de cada sincronización y al cambiar `dev`.
+- Requiere **Settings → Pages → Source: GitHub Actions** (en lugar de "Deploy from a branch").
+
 ## Configuración
 
 Editá `config.json` (se puede hacer desde la web de GitHub):
 
 ```json
 {
-  "objetivos": { "natacion_km_semana": 10, "golf_rondas_semana": 1 },
+  "objetivos": { "natacion_km_semana": 10, "golf_rondas_semana": 1, "golf_golpes_9": 50, "golf_golpes_18": 100 },
   "proxima_carrera": { "nombre": "Cruce del lago", "fecha": "2027-01-15", "distancia_m": 3000 }
 }
 ```
 
-- `objetivos`: las metas de los anillos del resumen.
+- `objetivos`: las metas de los anillos del resumen y el objetivo de golpes por ronda de 9 y de 18 hoyos.
 - `proxima_carrera`: aparece con una cuenta regresiva en *Natación → Aguas abiertas*.
 
 ## Desarrollo local

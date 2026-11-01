@@ -1,0 +1,65 @@
+name: Publicar sitio (prod + dev)
+
+# Arma un solo sitio de GitHub Pages:
+#   /       -> rama main (prod)
+#   /dev/   -> rama dev, con los mismos datos de prod
+# Siempre corre desde main, así respeta la protección del ambiente github-pages.
+on:
+  push:
+    branches: [main]
+  workflow_run:
+    workflows: ["Sincronizar Garmin"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: prod
+
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          path: dev
+
+      - name: Armar sitio
+        run: |
+          mkdir -p site/dev
+          rsync -a --exclude .git --exclude .github --exclude scripts prod/ site/
+          rsync -a --exclude .git --exclude .github --exclude scripts --exclude data dev/ site/dev/
+          cp -r prod/data site/dev/data
+          # aplica los cálculos de dev (récords, estilos, series) a los datos de prod
+          python3 dev/scripts/rederive.py site/dev/data
+          # el acceso directo de dev se distingue en la pantalla de inicio
+          sed -i 's/"name": "Training Performance"/"name": "Training Performance DEV"/; s/"short_name": "Training"/"short_name": "Training DEV"/' site/dev/manifest.webmanifest
+          echo "prod: $(git -C prod rev-parse --short HEAD)  dev: $(git -C dev rev-parse --short HEAD)"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

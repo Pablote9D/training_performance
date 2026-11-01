@@ -1,0 +1,18 @@
+name: Publicar dev
+
+# Un push a dev dispara la publicación (que corre desde main y arma prod + dev).
+on:
+  push:
+    branches: [dev]
+
+permissions:
+  actions: write
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disparar "Publicar sitio"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main

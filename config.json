@@ -1,7 +1,9 @@
 {
   "objetivos": {
     "natacion_km_semana": 10,
-    "golf_rondas_semana": 1
+    "golf_rondas_semana": 1,
+    "golf_golpes_9": 50,
+    "golf_golpes_18": 100
   },
   "proxima_carrera": {
     "nombre": "",
