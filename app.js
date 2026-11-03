@@ -8,7 +8,7 @@
   /** Ambiente: la copia publicada en /dev/ es el entorno de pruebas. */
   const IS_DEV = /\/dev(\/|$)/.test(location.pathname);
 
-  const PERIODS = [['S', 7, 'última semana'], ['M', 30, 'último mes'], ['3M', 90, 'últimos 3 meses'], ['A', 365, 'último año'], ['Todo', 0, 'todo el historial']];
+  const PERIODS = [['S', 7, 'última semana'], ['M', 30, 'último mes'], ['3M', 90, 'últimos 3 meses'], ['A', 365, 'último año'], ['Todo', 0, 'todo el historial'], ['R', -1, 'rango de fechas']];
   const FREE = 'libre';
   const ICON = {
     swim: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 18c2 0 2-1.5 4-1.5S8 18 10 18s2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5"/><circle cx="16" cy="7" r="2"/><path d="M4 13l5-4 3 2 4-2"/></svg>',
@@ -33,6 +33,7 @@
     per: store.get('tp:per', '3M'),
     golfPer: store.get('tp:golfPer', '3M'),
     golfHoles: store.get('tp:golfHoles', null),
+    range: store.get('tp:range', null),
     shown: 10,
     editRace: false,
   };
@@ -69,14 +70,37 @@
     return cap(parseD(s).toLocaleDateString('es-AR', opts).replace(/\./g, '').replace(',', ''));
   }
 
-  function inPeriod(rows, days, offset = 0) {
-    if (!days) return offset ? [] : rows;
-    const end = addDays(today(), 1 - days * offset);
-    const start = addDays(end, -days);
-    return rows.filter((r) => { const d = parseD(r.date); return d >= start && d < end; });
-  }
   const period = (key) => PERIODS.find((p) => p[0] === key) || PERIODS[2];
   const periodDays = (key) => period(key)[1];
+  /** Rango de fechas elegido a mano (por defecto, los últimos 30 días). */
+  function rangeSel() {
+    const def = { from: isoD(addDays(today(), -29)), to: isoD(today()) };
+    const r = { ...def, ...(S.range || {}) };
+    return r.from > r.to ? { from: r.to, to: r.from } : r;
+  }
+  /** Ventana [start, end) del período; offset 1 = el período anterior de igual largo. null = todo. */
+  function windowOf(key, offset = 0) {
+    if (key === 'R') {
+      const r = rangeSel();
+      const start = parseD(r.from), end = addDays(parseD(r.to), 1);
+      const days = Math.round((end - start) / 864e5);
+      return { start: addDays(start, -days * offset), end: addDays(end, -days * offset), days };
+    }
+    const days = periodDays(key);
+    if (!days) return null;
+    const end = addDays(today(), 1 - days * offset);
+    return { start: addDays(end, -days), end, days };
+  }
+  function inPeriod(rows, key, offset = 0) {
+    const w = windowOf(key, offset);
+    if (!w) return offset ? [] : rows;
+    return rows.filter((r) => { const d = parseD(r.date); return d >= w.start && d < w.end; });
+  }
+  function periodName(key) {
+    if (key !== 'R') return period(key)[2];
+    const r = rangeSel();
+    return r.from === r.to ? shortDate(r.from) : `${shortDate(r.from)} al ${shortDate(r.to)}`;
+  }
 
   // ───────── natación: cálculos ─────────
   const moving = (s) => s.moving_s || s.duration_s || 0;
@@ -156,8 +180,14 @@
     `<div class="kpi"><div class="label">${label}</div><div class="value">${value}${unit ? `<small> ${unit}</small>` : ''}</div>${sub}</div>`;
 
   function pills(kind, current, action) {
-    return `<div class="pills ${kind}" role="group" aria-label="Período">${PERIODS.map(([k, , name]) =>
-      `<button type="button" data-act="${action}" data-val="${k}" aria-pressed="${k === current}" aria-label="${cap(name)}">${k}</button>`).join('')}</div>`;
+    const r = rangeSel();
+    const btns = PERIODS.map(([k, , name]) =>
+      `<button type="button" data-act="${action}" data-val="${k}" aria-pressed="${k === current}" aria-label="${cap(name)}">${k === 'R' ? 'Fechas' : k}</button>`).join('');
+    const range = current === 'R' ? `<div class="range ${kind}">
+        <label>Desde<input type="date" data-range="from" value="${r.from}" max="${isoD(today())}"></label>
+        <label>Hasta<input type="date" data-range="to" value="${r.to}" max="${isoD(today())}"></label>
+      </div>` : '';
+    return `<div class="pills ${kind}" role="group" aria-label="Período">${btns}</div>${range}`;
   }
 
   function sampleBanner() {
@@ -582,17 +612,20 @@
 
   // ───────── vista: natación ─────────
   function volumeChart(rows) {
-    const days = periodDays(S.per);
+    const w = windowOf(S.per);
+    const days = w ? w.days : 0;
+    const last = w ? addDays(w.end, -1) : today();
+    const custom = S.per === 'R';
     let buckets = [], weekly;
     if (days && days <= 90) {
-      const n = days === 90 ? 13 : 8;
-      const start = addDays(monday(today()), -7 * (n - 1));
+      const n = custom ? Math.round((monday(last) - monday(w.start)) / (7 * 864e5)) + 1 : days === 90 ? 13 : 8;
+      const start = addDays(monday(last), -7 * (n - 1));
       for (let i = 0; i < n; i++) buckets.push({ from: addDays(start, 7 * i), to: addDays(start, 7 * (i + 1)), v: 0 });
       weekly = true;
     } else {
-      const first = days ? addDays(today(), -days + 1) : (rows[0] ? parseD(rows[0].date) : today());
+      const first = w ? w.start : (rows[0] ? parseD(rows[0].date) : today());
       let m = new Date(first.getFullYear(), first.getMonth(), 1);
-      while (m <= today()) { const nx = new Date(m.getFullYear(), m.getMonth() + 1, 1); buckets.push({ from: m, to: nx, v: 0 }); m = nx; }
+      while (m <= last) { const nx = new Date(m.getFullYear(), m.getMonth() + 1, 1); buckets.push({ from: m, to: nx, v: 0 }); m = nx; }
       weekly = false;
     }
     for (const s of rows) {
@@ -608,7 +641,7 @@
     return `<section class="card wide">
       <div class="card-head"><h2 class="card-title">${title}</h2><span class="muted">prom. ${nf(avg / 1000, 1)}</span></div>
       ${bars(items, { label: `${title}${crolMode() ? ' de crol' : ''}, promedio ${nf(avg / 1000, 1)} km` })}
-      <div class="axis"><span>${lbl(buckets[0])}</span><span>${lbl(buckets[Math.floor(buckets.length / 2)])}</span><span>${weekly ? 'esta sem.' : 'este mes'}</span></div>
+      <div class="axis"><span>${lbl(buckets[0])}</span><span>${lbl(buckets[Math.floor(buckets.length / 2)])}</span><span>${custom ? lbl(buckets[buckets.length - 1]) : weekly ? 'esta sem.' : 'este mes'}</span></div>
     </section>`;
   }
 
@@ -636,8 +669,9 @@
     const pool = S.env === 'pool';
     const crol = crolMode();
     const rows = S.swim.sessions.filter((s) => s.env === S.env);
-    const [, days, pname] = period(S.per);
-    const cur = inPeriod(rows, days), prev = inPeriod(rows, days, 1);
+    const pname = periodName(S.per);
+    const days = windowOf(S.per)?.days || 0;
+    const cur = inPeriod(rows, S.per), prev = inPeriod(rows, S.per, 1);
     const a = swimAgg(cur), b = swimAgg(prev);
     const all = swimAgg(cur, false);
     const hasPrev = days && b.n;
@@ -852,8 +886,9 @@
 
   function viewGolf() {
     const rows = S.golf.rounds;
-    const [, days, pname] = period(S.golfPer);
-    const cur = inPeriod(rows, days), prev = inPeriod(rows, days, 1);
+    const pname = periodName(S.golfPer);
+    const days = windowOf(S.golfPer)?.days || 0;
+    const cur = inPeriod(rows, S.golfPer), prev = inPeriod(rows, S.golfPer, 1);
     const a = golfAgg(cur), b = golfAgg(prev);
     const hasPrev = days && prev.length;
     const d = (x, y, f, bt) => (hasPrev ? delta(x, y, f, bt) : '');
@@ -1037,6 +1072,14 @@
     if (act === 'more') S.shown += 20;
     if (act === 'raceEdit') S.editRace = true;
     if (act === 'raceCancel') S.editRace = false;
+    render();
+  });
+  document.addEventListener('change', (e) => {
+    const inp = e.target.closest('[data-range]');
+    if (!inp || !inp.value) return;
+    S.range = { ...rangeSel(), [inp.dataset.range]: inp.value };
+    store.set('tp:range', S.range);
+    S.shown = 10;
     render();
   });
   document.addEventListener('submit', (e) => {

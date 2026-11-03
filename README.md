@@ -19,7 +19,7 @@ Garmin Connect ──(GitHub Actions, todos los días)──> data/*.json ──
 
 1. `scripts/sync_garmin.py` usa la API **no oficial** de Garmin Connect (librería [`garminconnect`](https://github.com/cyberjunky/python-garminconnect)) para bajar las actividades nuevas.
 2. Guarda solo las métricas que muestra la página: **sin GPS, ubicación ni datos del perfil**.
-3. El workflow `.github/workflows/sync-garmin.yml` corre todos los días a las 06:17 (hora de Argentina) y commitea los datos.
+3. El workflow `.github/workflows/sync-garmin.yml` corre todos los días a las 21:30 (hora de Argentina) y commitea los datos.
 4. GitHub Pages publica la página.
 
 > La API no es oficial y Garmin puede cambiarla. Si un día la sincronización falla, suele alcanzar con actualizar la versión de `garminconnect` en `requirements.txt`.
@@ -58,7 +58,7 @@ Los secretos no se ven aunque el repo sea público.
 
 ### 3. Primera sincronización
 
-**Actions → Sincronizar Garmin → Run workflow.** La primera vez baja todo el historial desde 2020, así que puede tardar unos minutos. Después corre solo todos los días.
+**Actions → Sincronizar Garmin → Run workflow.** La primera vez baja todo el historial desde 2020, así que puede tardar unos minutos. Después corre sola todos los días a las 21:30 (GitHub a veces la demora un rato). Si querés ver una sesión antes, usá *Run workflow*.
 
 Si falla al hacer `git push`, revisá **Settings → Actions → General → Workflow permissions** y elegí *Read and write permissions*.
 
