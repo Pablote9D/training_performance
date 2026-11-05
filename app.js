@@ -412,25 +412,27 @@
     </section>`;
   }
 
-  /** Brazadas por pileta de crol (ciclos del brazo con reloj), llevadas a 25 m. */
+  /** El reloj cuenta solo el brazo que lo lleva: se multiplica por 2 para tener las brazadas reales (ambos brazos). */
+  const ARMS = 2;
+  /** Brazadas por pileta de crol (ambos brazos), llevadas a 25 m. */
   function spl(s) {
     const b = s.by_stroke && s.by_stroke[FREE];
     if (!b || !b.n || b.n < 8 || b.tsw == null) return null;
-    const v = ((b.sw - b.tsw) / b.n) * (25 / (s.pool_m || 25));
+    const v = ARMS * ((b.sw - b.tsw) / b.n) * (25 / (s.pool_m || 25));
     return v > 0 ? v : null;
   }
-  /** Frecuencia de brazada de crol: brazadas por minuto del brazo con el reloj (igual que Garmin). */
+  /** Frecuencia de brazada de crol: brazadas por minuto, contando ambos brazos. */
   function strokeRate(s) {
     const b = s.by_stroke && s.by_stroke[FREE];
     if (!b || !b.n || b.n < 8 || !b.tsw) return null;
-    const v = ((b.sw - b.tsw) / b.tsw) * 60;
+    const v = ARMS * ((b.sw - b.tsw) / b.tsw) * 60;
     return v > 0 ? v : null;
   }
   /** Frecuencia de un conjunto de piletas (brazadas = SWOLF − segundos). */
   function lengthsRate(lengths) {
     let strokes = 0, secs = 0;
     for (const l of lengths || []) if (l.swolf && l.t && l.swolf > l.t) { strokes += l.swolf - l.t; secs += l.t; }
-    return secs ? (strokes / secs) * 60 : null;
+    return secs ? (ARMS * strokes * 60) / secs : null;
   }
 
   /** Brazadas por pileta y frecuencia: el ritmo sale de cuánto avanzás por brazada y de cuán rápido braceás. */
@@ -441,11 +443,11 @@
     let insight = '';
     if (a && b && ra && rb) {
       const dl = a - b, dr = ra - rb, same = (x, tol) => Math.abs(x) < tol;
-      if (same(dl, 0.2) && same(dr, 0.5)) insight = 'Brazada parecida al período anterior: mismo largo y misma frecuencia.';
-      else if (dl < 0 && same(dr, 0.5)) insight = 'Avanzás más con cada brazada sin cambiar la frecuencia: eso es técnica.';
+      if (same(dl, 0.4) && same(dr, 1)) insight = 'Brazada parecida al período anterior: mismo largo y misma frecuencia.';
+      else if (dl < 0 && same(dr, 1)) insight = 'Avanzás más con cada brazada sin cambiar la frecuencia: eso es técnica.';
       else if (dl < 0 && dr < 0) insight = 'Brazada más larga y más pausada que antes.';
       else if (dl < 0 && dr > 0) insight = 'Brazada más larga y además más rápida: muy buena señal.';
-      else if (same(dl, 0.2) && dr > 0) insight = 'Estás braceando más rápido con el mismo largo: cuidá sostenerlo en distancias largas.';
+      else if (same(dl, 0.4) && dr > 0) insight = 'Estás braceando más rápido con el mismo largo: cuidá sostenerlo en distancias largas.';
       else if (dl > 0 && dr > 0) insight = 'Brazada más corta pero más rápida: puede ser cansancio o series de velocidad.';
       else insight = 'Brazada más corta y más lenta que antes: revisá la técnica o el cansancio.';
     }
@@ -462,7 +464,7 @@
         ${spark(splSpark.map((s) => ({ v: spl(s), label: shortDate(s.date) })), { color: 'var(--teal)', fmt: (v) => `${nf(v, 1)} brazadas`, height: 48, label: 'Brazadas por pileta de crol por sesión' })}</div>
       <div class="stack" style="gap:4px"><div class="hint">Frecuencia · brazadas por minuto</div>
         ${spark(rateSpark.map((s) => ({ v: strokeRate(s), label: shortDate(s.date) })), { color: 'var(--sand)', fmt: (v) => `${nf(v, 1)} /min`, height: 48, label: 'Frecuencia de brazada de crol por sesión' })}</div>
-      <div class="hint">Cuenta las brazadas del brazo con el reloj, igual que Garmin (contando los dos brazos es el doble). Ritmo = largo de brazada × frecuencia.</div>
+      <div class="hint">Brazadas reales, contando los dos brazos (Garmin muestra la mitad porque cuenta solo el brazo con el reloj). Ritmo = largo de brazada × frecuencia.</div>
     </section>`;
   }
 
