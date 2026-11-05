@@ -69,14 +69,21 @@
     return cap(parseD(s).toLocaleDateString('es-AR', opts).replace(/\./g, '').replace(',', ''));
   }
 
-  function inPeriod(rows, days, offset = 0) {
-    if (!days) return offset ? [] : rows;
-    const end = addDays(today(), 1 - days * offset);
-    const start = addDays(end, -days);
-    return rows.filter((r) => { const d = parseD(r.date); return d >= start && d < end; });
-  }
   const period = (key) => PERIODS.find((p) => p[0] === key) || PERIODS[2];
   const periodDays = (key) => period(key)[1];
+  /** Ventana [start, end) del período; offset 1 = el período anterior de igual largo. null = todo. */
+  function windowOf(key, offset = 0) {
+    const days = periodDays(key);
+    if (!days) return null;
+    const end = addDays(today(), 1 - days * offset);
+    return { start: addDays(end, -days), end, days };
+  }
+  function inPeriod(rows, key, offset = 0) {
+    const w = windowOf(key, offset);
+    if (!w) return offset ? [] : rows;
+    return rows.filter((r) => { const d = parseD(r.date); return d >= w.start && d < w.end; });
+  }
+  const periodName = (key) => period(key)[2];
 
   // ───────── natación: cálculos ─────────
   const moving = (s) => s.moving_s || s.duration_s || 0;
@@ -159,6 +166,27 @@
     return `<div class="pills ${kind}" role="group" aria-label="Período">${PERIODS.map(([k, , name]) =>
       `<button type="button" data-act="${action}" data-val="${k}" aria-pressed="${k === current}" aria-label="${cap(name)}">${k}</button>`).join('')}</div>`;
   }
+
+  /** Desplegable con las fechas de las sesiones (o rondas), agrupadas por mes: elegir una abre su detalle. */
+  function datePicker(kind, items, currentId) {
+    if (!items.length) return '';
+    const groups = new Map();
+    for (const it of [...items].reverse()) {
+      const d = parseD(it.date);
+      const g = cap(d.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }));
+      if (!groups.has(g)) groups.set(g, []);
+      const day = cap(d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' }).replace(/\./g, '').replace(',', ''));
+      const what = kind === 'golf' ? `${it.strokes} golpes · ${it.holes_played} hoyos` : `${meters(it.distance_m)}${it.env === 'ow' ? ' · aguas abiertas' : ''}`;
+      groups.get(g).push(`<option value="${it.id}" ${String(it.id) === String(currentId) ? 'selected' : ''}>${esc(`${day} · ${what}`)}</option>`);
+    }
+    const label = kind === 'golf' ? 'Ir a una ronda' : 'Ir a una sesión';
+    return `<label class="picker ${kind}"><span class="muted">${label}</span>
+      <select data-goto="${kind === 'golf' ? 'golf' : 'natacion'}" aria-label="${label}">
+        ${currentId ? '' : '<option value="" selected disabled>Elegí la fecha…</option>'}
+        ${[...groups].map(([g, opts]) => `<optgroup label="${esc(g)}">${opts.join('')}</optgroup>`).join('')}
+      </select></label>`;
+  }
+
 
   function sampleBanner() {
     if (!S.swim.sample && !S.golf.sample) return '';
@@ -384,24 +412,62 @@
     </section>`;
   }
 
-  /** Brazadas por pileta de crol (ciclos del brazo con reloj), llevadas a 25 m. */
+  /** El reloj cuenta solo el brazo que lo lleva: se multiplica por 2 para tener las brazadas reales (ambos brazos). */
+  const ARMS = 2;
+  /** Brazadas por pileta de crol (ambos brazos), llevadas a 25 m. */
   function spl(s) {
     const b = s.by_stroke && s.by_stroke[FREE];
     if (!b || !b.n || b.n < 8 || b.tsw == null) return null;
-    const v = ((b.sw - b.tsw) / b.n) * (25 / (s.pool_m || 25));
+    const v = ARMS * ((b.sw - b.tsw) / b.n) * (25 / (s.pool_m || 25));
     return v > 0 ? v : null;
   }
+  /** Frecuencia de brazada de crol: brazadas por minuto, contando ambos brazos. */
+  function strokeRate(s) {
+    const b = s.by_stroke && s.by_stroke[FREE];
+    if (!b || !b.n || b.n < 8 || !b.tsw) return null;
+    const v = ARMS * ((b.sw - b.tsw) / b.tsw) * 60;
+    return v > 0 ? v : null;
+  }
+  /** Frecuencia de un conjunto de piletas (brazadas = SWOLF − segundos). */
+  function lengthsRate(lengths) {
+    let strokes = 0, secs = 0;
+    for (const l of lengths || []) if (l.swolf && l.t && l.swolf > l.t) { strokes += l.swolf - l.t; secs += l.t; }
+    return secs ? (ARMS * strokes * 60) / secs : null;
+  }
+
+  /** Brazadas por pileta y frecuencia: el ritmo sale de cuánto avanzás por brazada y de cuán rápido braceás. */
   function efficiencyCard(cur, prev) {
-    const xs = cur.filter(spl), ys = prev.filter(spl);
-    const avg = (arr) => (arr.length ? arr.reduce((a, s) => a + spl(s), 0) / arr.length : null);
-    const a = avg(xs), b = avg(ys);
+    const avgOf = (arr, f) => { const xs = arr.map(f).filter((v) => v != null); return xs.length ? xs.reduce((x, y) => x + y, 0) / xs.length : null; };
+    const a = avgOf(cur, spl), b = avgOf(prev, spl);
+    const ra = avgOf(cur, strokeRate), rb = avgOf(prev, strokeRate);
+    let insight = '';
+    if (a && b && ra && rb) {
+      const dl = a - b, dr = ra - rb, same = (x, tol) => Math.abs(x) < tol;
+      if (same(dl, 0.4) && same(dr, 1)) insight = 'Brazada parecida al período anterior: mismo largo y misma frecuencia.';
+      else if (dl < 0 && same(dr, 1)) insight = 'Avanzás más con cada brazada sin cambiar la frecuencia: eso es técnica.';
+      else if (dl < 0 && dr < 0) insight = 'Brazada más larga y más pausada que antes.';
+      else if (dl < 0 && dr > 0) insight = 'Brazada más larga y además más rápida: muy buena señal.';
+      else if (same(dl, 0.4) && dr > 0) insight = 'Estás braceando más rápido con el mismo largo: cuidá sostenerlo en distancias largas.';
+      else if (dl > 0 && dr > 0) insight = 'Brazada más corta pero más rápida: puede ser cansancio o series de velocidad.';
+      else insight = 'Brazada más corta y más lenta que antes: revisá la técnica o el cansancio.';
+    }
+    const rateSpark = cur.filter(strokeRate);
+    const splSpark = cur.filter(spl);
     return `<section class="card">
-      <div class="card-head"><h2 class="card-title">Brazadas por pileta</h2><span class="hint">crol · menos = más eficiente</span></div>
-      <div class="css-head"><div class="big-num">${a ? nf(a, 1) : '—'}</div>${b && a ? delta(a, b, (v) => nf(v, 1), 'down') : ''}</div>
-      ${spark(xs.map((s) => ({ v: spl(s), label: shortDate(s.date) })), { color: 'var(--teal)', fmt: (v) => `${nf(v, 1)} brazadas`, height: 56, label: 'Brazadas por pileta de crol por sesión' })}
-      <div class="hint">Ciclos del brazo con el reloj en cada pileta de 25 m. Si bajan sin perder ritmo, estás avanzando más por brazada.</div>
+      <div class="card-head"><h2 class="card-title">Técnica de brazada</h2><span class="hint">crol</span></div>
+      <div class="cols">
+        <div><div class="muted">Brazadas por pileta</div><div class="big-num">${a ? nf(a, 1) : '—'}</div>${a && b ? delta(a, b, (v) => nf(v, 1), 'down') : ''}</div>
+        <div><div class="muted">Frecuencia</div><div class="big-num">${ra ? nf(ra) : '—'}<small style="font-size:14px;color:var(--text-2);letter-spacing:0"> /min</small></div>${ra && rb ? delta(ra, rb, (v) => nf(v, 1), null) : ''}</div>
+      </div>
+      ${insight ? `<div class="muted">${insight}</div>` : ''}
+      <div class="stack" style="gap:4px"><div class="hint">Brazadas por pileta · menos = más eficiente</div>
+        ${spark(splSpark.map((s) => ({ v: spl(s), label: shortDate(s.date) })), { color: 'var(--teal)', fmt: (v) => `${nf(v, 1)} brazadas`, height: 48, label: 'Brazadas por pileta de crol por sesión' })}</div>
+      <div class="stack" style="gap:4px"><div class="hint">Frecuencia · brazadas por minuto</div>
+        ${spark(rateSpark.map((s) => ({ v: strokeRate(s), label: shortDate(s.date) })), { color: 'var(--sand)', fmt: (v) => `${nf(v, 1)} /min`, height: 48, label: 'Frecuencia de brazada de crol por sesión' })}</div>
+      <div class="hint">Brazadas reales, contando los dos brazos (Garmin muestra la mitad porque cuenta solo el brazo con el reloj). Ritmo = largo de brazada × frecuencia.</div>
     </section>`;
   }
+
 
   function splitLabel(p1, p2) {
     const d = p2 - p1;
@@ -582,17 +648,19 @@
 
   // ───────── vista: natación ─────────
   function volumeChart(rows) {
-    const days = periodDays(S.per);
+    const w = windowOf(S.per);
+    const days = w ? w.days : 0;
+    const last = w ? addDays(w.end, -1) : today();
     let buckets = [], weekly;
     if (days && days <= 90) {
       const n = days === 90 ? 13 : 8;
-      const start = addDays(monday(today()), -7 * (n - 1));
+      const start = addDays(monday(last), -7 * (n - 1));
       for (let i = 0; i < n; i++) buckets.push({ from: addDays(start, 7 * i), to: addDays(start, 7 * (i + 1)), v: 0 });
       weekly = true;
     } else {
-      const first = days ? addDays(today(), -days + 1) : (rows[0] ? parseD(rows[0].date) : today());
+      const first = w ? w.start : (rows[0] ? parseD(rows[0].date) : today());
       let m = new Date(first.getFullYear(), first.getMonth(), 1);
-      while (m <= today()) { const nx = new Date(m.getFullYear(), m.getMonth() + 1, 1); buckets.push({ from: m, to: nx, v: 0 }); m = nx; }
+      while (m <= last) { const nx = new Date(m.getFullYear(), m.getMonth() + 1, 1); buckets.push({ from: m, to: nx, v: 0 }); m = nx; }
       weekly = false;
     }
     for (const s of rows) {
@@ -636,8 +704,9 @@
     const pool = S.env === 'pool';
     const crol = crolMode();
     const rows = S.swim.sessions.filter((s) => s.env === S.env);
-    const [, days, pname] = period(S.per);
-    const cur = inPeriod(rows, days), prev = inPeriod(rows, days, 1);
+    const pname = periodName(S.per);
+    const days = windowOf(S.per)?.days || 0;
+    const cur = inPeriod(rows, S.per), prev = inPeriod(rows, S.per, 1);
     const a = swimAgg(cur), b = swimAgg(prev);
     const all = swimAgg(cur, false);
     const hasPrev = days && b.n;
@@ -688,6 +757,7 @@
           <button type="button" data-act="env" data-val="ow" aria-pressed="${!pool}">Aguas abiertas</button>
         </div>
         ${pills('swim', S.per, 'per')}
+        ${datePicker('swim', S.swim.sessions)}
       </div>
       <section class="cols-3">${kpis}</section>
       <div class="split">
@@ -732,7 +802,7 @@
       ['Ritmo', clock(pace(moving(s), s.distance_m))],
       ['SWOLF', s.swolf ?? '—', 'var(--sand)'],
       ['FC prom.', s.avg_hr ?? '—'],
-      ['FC máx.', s.max_hr ?? '—'],
+      ['Frec. crol', strokeRate(s) ? `${nf(strokeRate(s))}/min` : '—'],
       ['Calorías', s.calories ?? '—'],
     ].map(([l, v, c]) => `<div><div class="label">${l}</div><div class="value" ${c ? `style="color:${c}"` : ''}>${v}</div></div>`).join('');
 
@@ -763,7 +833,8 @@
         for (const l of it.lengths || []) {
           if (!l.t || !l.d) continue;
           k++;
-          const tip = [`Pileta ${k} · ${strokeName(l.stroke)}`, `${clock(l.t)} · ${clock(pace(l.t, l.d))} /100m`, l.swolf ? `SWOLF ${l.swolf}` : ''].filter(Boolean).join('\n');
+          const lr = lengthsRate([l]);
+          const tip = [`Pileta ${k} · ${strokeName(l.stroke)}`, `${clock(l.t)} · ${clock(pace(l.t, l.d))} /100m`, [l.swolf ? `SWOLF ${l.swolf}` : '', lr ? `${nf(lr)} brazadas/min` : ''].filter(Boolean).join(' · ')].filter(Boolean).join('\n');
           items.push({ v: 1, h: Math.max(4, Math.min(100, 8 + (92 * (l.d / l.t - lo)) / (hi - lo || 1))), cls: l.stroke === FREE ? 'free' : 'oth', tip });
         }
       }
@@ -796,11 +867,11 @@
         const sp = splitsByIdx.get(idx);
         const spl = sp ? splitLabel(sp.p1, sp.p2) : null;
         const note = sp ? `<div class="split-note">1ª mitad ${clock(sp.p1)} → 2ª ${clock(sp.p2)} <span class="badge ${spl.cls}">${spl.txt}</span></div>` : '';
-        return `<div class="tr ${it.stroke === FREE ? 'free' : ''}"><span class="name">${n}. ${nf(it.distance_m)} ${esc(strokeName(it.stroke))}</span><span>${clock(it.duration_s)}</span><span>${clock(pace(it.duration_s, it.distance_m))}</span><span>${it.swolf || '—'}</span></div>` + note;
+        return `<div class="tr ${it.stroke === FREE ? 'free' : ''}"><span class="name">${n}. ${nf(it.distance_m)} ${esc(strokeName(it.stroke))}</span><span>${clock(it.duration_s)}</span><span>${clock(pace(it.duration_s, it.distance_m))}</span><span>${it.swolf || '—'}</span><span>${lengthsRate(it.lengths) ? nf(lengthsRate(it.lengths)) : '—'}</span></div>` + note;
       }).join('');
       tableHtml = `<section class="card wide">
         <h2 class="card-title">Intervalos</h2>
-        <div class="table"><div class="tr th"><span>Tramo</span><span>Tiempo</span><span>/100m</span><span>SWOLF</span></div>${rowsHtml}</div>
+        <div class="table"><div class="tr th"><span>Tramo</span><span>Tiempo</span><span>/100m</span><span>SWOLF</span><span>Br/min</span></div>${rowsHtml}</div>
       </section>`;
     }
 
@@ -820,6 +891,7 @@
         </div>
         ${WAVE}
       </section>
+      ${datePicker('swim', S.swim.sessions, s.id)}
       <section class="card"><div class="stats">${stats}</div></section>
       <div class="split">
         ${loading ? '<div class="empty wide">Cargando detalle…</div>' : ''}
@@ -852,8 +924,9 @@
 
   function viewGolf() {
     const rows = S.golf.rounds;
-    const [, days, pname] = period(S.golfPer);
-    const cur = inPeriod(rows, days), prev = inPeriod(rows, days, 1);
+    const pname = periodName(S.golfPer);
+    const days = windowOf(S.golfPer)?.days || 0;
+    const cur = inPeriod(rows, S.golfPer), prev = inPeriod(rows, S.golfPer, 1);
     const a = golfAgg(cur), b = golfAgg(prev);
     const hasPrev = days && prev.length;
     const d = (x, y, f, bt) => (hasPrev ? delta(x, y, f, bt) : '');
@@ -907,7 +980,7 @@
         ${WAVE}
       </section>
       ${sampleBanner()}
-      <div class="controls">${pills('golf', S.golfPer, 'golfPer')}</div>
+      <div class="controls">${pills('golf', S.golfPer, 'golfPer')}${datePicker('golf', S.golf.rounds)}</div>
       <section class="cols kpis">${kpis}</section>
       <div class="split">
         <section class="card wide">
@@ -961,6 +1034,7 @@
         </div>
         ${WAVE}
       </section>
+      ${datePicker('golf', S.golf.rounds, r.id)}
       <section class="card"><div class="stats">${stats}</div></section>
       <section class="card"><h2 class="card-title">Tarjeta</h2>${scorecard(r.holes || [])}${scLegend}</section>`;
   }
@@ -1038,6 +1112,10 @@
     if (act === 'raceEdit') S.editRace = true;
     if (act === 'raceCancel') S.editRace = false;
     render();
+  });
+  document.addEventListener('change', (e) => {
+    const sel = e.target.closest('[data-goto]');
+    if (sel && sel.value) location.hash = `#/${sel.dataset.goto}/${sel.value}`;
   });
   document.addEventListener('submit', (e) => {
     const form = e.target.closest('[data-form="race"]');
