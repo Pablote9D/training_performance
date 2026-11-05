@@ -189,7 +189,7 @@ a.row:hover, a.row:focus-visible { background: var(--card-2); }
 .split-bar span { display: block; height: 100%; }
 
 .table { display: flex; flex-direction: column; }
-.table .tr { display: grid; grid-template-columns: minmax(0, 1.7fr) repeat(3, minmax(0, 1fr)); padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; font-variant-numeric: tabular-nums; gap: 4px; }
+.table .tr { display: grid; grid-template-columns: minmax(0, 1.6fr) repeat(4, minmax(0, 0.85fr)); padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; font-variant-numeric: tabular-nums; gap: 4px; }
 .table .tr > :not(:first-child) { text-align: right; }
 .table .tr.free .name::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 4px; background: var(--teal); margin-right: 6px; vertical-align: 1px; }
 .table .th { font-size: 11px; color: var(--text-2); border-top: 0; padding: 4px 0; }
