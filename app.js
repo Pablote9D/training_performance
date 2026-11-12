@@ -428,10 +428,23 @@
     const v = ARMS * ((b.sw - b.tsw) / b.tsw) * 60;
     return v > 0 ? v : null;
   }
+  /** Igual que scripts/swimcalc.py: si el 80% o más de las piletas de un intervalo son de un estilo,
+   *  todo el intervalo es de ese estilo (el reloj a veces marca mal alguna pileta). */
+  function normIntervals(intervals) {
+    const skip = new Set(['técnica', 'otro', null, undefined]);
+    return intervals.map((it) => {
+      const swum = (it.lengths || []).map((l) => l.stroke).filter((st) => !skip.has(st));
+      if (!swum.length) return it;
+      const counts = swum.reduce((m, st) => m.set(st, (m.get(st) || 0) + 1), new Map());
+      const [top, n] = [...counts].sort((a, b) => b[1] - a[1])[0];
+      if (n / swum.length < 0.8) return it;
+      return { ...it, stroke: top, lengths: it.lengths.map((l) => (skip.has(l.stroke) ? l : { ...l, stroke: top })) };
+    });
+  }
   /** Frecuencia de un conjunto de piletas (brazadas = SWOLF − segundos). */
   function lengthsRate(lengths) {
     let strokes = 0, secs = 0;
-    for (const l of lengths || []) if (l.swolf && l.t && l.swolf > l.t) { strokes += l.swolf - l.t; secs += l.t; }
+    for (const l of lengths || []) if (l.swolf && l.t && l.swolf - l.t >= 3) { strokes += l.swolf - l.t; secs += l.t; } // < 3 brazadas: pileta fantasma
     return secs ? (ARMS * strokes * 60) / secs : null;
   }
 
@@ -792,7 +805,7 @@
     if (det === undefined && s.has_detail) {
       fetchJSON(`data/sesiones/${s.id}.json`).then((d) => { S.detail.set(s.id, d); render(); }).catch(() => { S.detail.set(s.id, null); render(); });
     }
-    const intervals = det?.intervals || [];
+    const intervals = normIntervals(det?.intervals || []);
     const loading = det === undefined && s.has_detail;
     const free = metrics(s, true);
     const isPool = s.env === 'pool';

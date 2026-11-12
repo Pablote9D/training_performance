@@ -10,8 +10,15 @@ FREESTYLE = "libre"
 MIN_SECONDS_PER_METER = 0.45
 
 
+# Una pileta real tiene varias brazadas: con menos de 3 (del brazo con reloj) es una pileta
+# "fantasma", el reloj partió una pileta en dos.
+MIN_WATCH_STROKES = 3
+
+
 def valid_length(ln: dict[str, Any]) -> bool:
     d, t = ln.get("d") or 0, ln.get("t") or 0
+    if ln.get("swolf") and ln["swolf"] - t < MIN_WATCH_STROKES:
+        return False
     return d > 0 and t >= d * MIN_SECONDS_PER_METER
 
 
@@ -88,10 +95,11 @@ def long_set_splits(intervals: list[dict[str, Any]], stroke: str = FREESTYLE, mi
     """
     out = []
     for i, it in enumerate(intervals):
-        lengths = it.get("lengths") or []
-        if it.get("kind") != "active" or len(lengths) < 8:
+        raw = it.get("lengths") or []
+        lengths = [ln for ln in raw if valid_length(ln)]  # sin piletas fantasma ni tiempos imposibles
+        if it.get("kind") != "active" or len(lengths) < 8 or len(lengths) < 0.85 * len(raw):
             continue
-        if not all(valid_length(ln) and ln.get("stroke") == stroke for ln in lengths):
+        if not all(ln.get("stroke") == stroke for ln in lengths):
             continue
         dist = sum(ln["d"] for ln in lengths)
         if dist < min_distance:
@@ -104,8 +112,36 @@ def long_set_splits(intervals: list[dict[str, Any]], stroke: str = FREESTYLE, mi
     return out
 
 
+DOMINANT_SHARE = 0.8
+
+
+def normalize_strokes(intervals: list[dict[str, Any]], share: float = DOMINANT_SHARE) -> list[dict[str, Any]]:
+    """Corrige el estilo que el reloj detecta mal en algunas piletas.
+
+    Si en un intervalo al menos el 80% de las piletas (sin contar técnica) son de un mismo
+    estilo, se asume que todo el intervalo fue de ese estilo: unas pocas piletas marcadas
+    como pecho en medio de una tirada de crol son errores de detección.
+    Devuelve una copia; no modifica los datos originales.
+    """
+    out = []
+    for it in intervals:
+        lengths = it.get("lengths") or []
+        swum = [ln.get("stroke") for ln in lengths if ln.get("stroke") not in NOT_A_STROKE]
+        dominant = None
+        if swum:
+            top = max(set(swum), key=swum.count)
+            if swum.count(top) / len(swum) >= share:
+                dominant = top
+        if dominant:
+            lengths = [{**ln, "stroke": dominant} if ln.get("stroke") not in NOT_A_STROKE else ln for ln in lengths]
+            it = {**it, "stroke": dominant, "lengths": lengths}
+        out.append(it)
+    return out
+
+
 def derive(intervals: list[dict[str, Any]]) -> dict[str, Any]:
     """Campos de resumen que se calculan a partir del detalle de una sesión."""
+    intervals = normalize_strokes(intervals)
     return {
         "best": best_efforts(intervals),
         "best_free": best_efforts(intervals, FREESTYLE),
