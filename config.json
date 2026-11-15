@@ -9,5 +9,12 @@
     "nombre": "",
     "fecha": "",
     "distancia_m": null
-  }
+  },
+  "tests_css": [
+    {
+      "fecha": "2026-02-02",
+      "t400": "6:23",
+      "t200": "2:44"
+    }
+  ]
 }

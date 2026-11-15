@@ -280,6 +280,15 @@ code { font-size: .92em; background: var(--card-2); padding: 1px 5px; border-rad
 .club .cbar .av { background: var(--golf); }
 .club .cv { text-align: right; font-weight: 700; }
 
+/* tipo de sesión y mezcla semanal */
+.type-badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; color: var(--bg); background: var(--c); vertical-align: 1px; letter-spacing: .01em; }
+.mix { display: flex; align-items: flex-end; gap: 8px; height: 150px; }
+.mix-col { flex: 1 1 0; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; cursor: pointer; min-width: 0; }
+.mix-bar { width: 100%; max-width: 40px; display: flex; flex-direction: column; gap: 2px; border-radius: 8px; overflow: hidden; min-height: 4px; background: var(--card-2); }
+.mix-bar span { display: block; width: 100%; min-height: 2px; }
+.mix-col.cur .hint { color: var(--buoy); font-weight: 700; }
+.mix-col.on .mix-bar { outline: 2px solid var(--text); outline-offset: 1px; }
+
 /* ───────── tooltip ───────── */
 .tip { position: fixed; z-index: 20; pointer-events: none; background: var(--text); color: var(--bg); border-radius: 10px; padding: 8px 10px; font-size: 12px; line-height: 1.35; box-shadow: 0 6px 20px rgba(0, 0, 0, .4); max-width: 220px; }
 .tip b { font-weight: 700; }

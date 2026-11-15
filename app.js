@@ -35,6 +35,7 @@
     golfHoles: store.get('tp:golfHoles', null),
     shown: 10,
     editRace: false,
+    addTest: false,
   };
   let afterRender = [];
 
@@ -261,7 +262,7 @@
     const sub = crol ? `${clock(pace(m.t, m.d))} /100m · de ${nf(s.distance_m)}` : `${clock(pace(m.t, m.d))} /100m`;
     return `<a class="row swim" href="#/natacion/${s.id}">
       <div class="ico swim">${ICON.swim}</div>
-      <div class="main"><div class="t">${esc(s.name || (s.env === 'pool' ? 'Natación en pileta' : 'Aguas abiertas'))}</div><div class="m">${meta}</div></div>
+      <div class="main"><div class="t">${sessionType(s) ? `${typeBadge(sessionType(s))} ` : ''}${esc(sessionType(s) ? (s.env === 'pool' ? 'Pileta' : 'Aguas abiertas') : s.name || (s.env === 'pool' ? 'Natación en pileta' : 'Aguas abiertas'))}</div><div class="m">${meta}</div></div>
       <div class="end"><div class="v">${meters(m.d)}${crol ? ' <small style="font-size:12px;font-weight:600;color:var(--text-2)">crol</small>' : ''}</div><div class="s">${sub}</div></div>
     </a>`;
   }
@@ -303,8 +304,13 @@
     let b = freeBests(poolUntil(ref, 90)), recent = true;
     if (!b['200'] || !b['400']) { b = freeBests(poolUntil(ref, 0)); recent = false; }
     if (!b['200'] || !b['400']) return null;
-    const css = (b['400'].t - b['200'].t) / 2;
-    return css > 0 ? { css, b200: b['200'], b400: b['400'], recent } : null;
+    let css = (b['400'].t - b['200'].t) / 2;
+    // el CSS es el ritmo sostenible ~30 min: no puede ser más lento que un 800/1500 que ya nadaste
+    const longKey = ['1500', '800'].find((k) => b[k]);
+    const cap = longKey ? b[longKey].t / (Number(longKey) / 100) : null;
+    const capped = cap != null && cap < css;
+    if (capped) css = cap;
+    return css > 0 ? { css, b200: b['200'], b400: b['400'], recent, capped, longKey, long: longKey ? b[longKey] : null } : null;
   }
 
   const OW_FACTOR = 1.05; // aguas abiertas: sin paredes ni vueltas, orientación, oleaje
@@ -393,6 +399,49 @@
     </section>`;
   }
 
+  // ───────── test de CSS ─────────
+  /** "6:10" o "6:10.5" → segundos. */
+  function parseClock(v) {
+    const m = String(v || '').trim().match(/^(\d+):(\d{1,2}(?:[.,]\d+)?)$/);
+    return m ? Number(m[1]) * 60 + Number(m[2].replace(',', '.')) : null;
+  }
+  /** Tests cargados en config.json (tests_css) y en este dispositivo, ordenados por fecha. */
+  function cssTests() {
+    const all = [...(S.cfg.tests_css || []), ...store.get('tp:tests', [])]
+      .map((t) => ({ fecha: t.fecha, t400: typeof t.t400 === 'number' ? t.t400 : parseClock(t.t400), t200: typeof t.t200 === 'number' ? t.t200 : parseClock(t.t200), local: !!t.local }))
+      .filter((t) => t.fecha && t.t400 > 0 && t.t200 > 0 && t.t400 > t.t200)
+      .map((t) => ({ ...t, css: (t.t400 - t.t200) / 2 }));
+    const seen = new Set();
+    return all.filter((t) => { const k = `${t.fecha}|${t.t400}|${t.t200}`; if (seen.has(k)) return false; seen.add(k); return true; })
+      .sort((a, b) => a.fecha.localeCompare(b.fecha));
+  }
+  /** CSS vigente en una fecha: el último test real hasta esa fecha (o el primero, para sesiones anteriores).
+   *  Solo sin ningún test cargado se usa un CSS estimado con tus mejores tiempos. */
+  function cssAt(dateStr = isoD(today())) {
+    const tests = cssTests();
+    if (tests.length) {
+      const prior = tests.filter((t) => t.fecha <= dateStr);
+      const t = prior.length ? prior[prior.length - 1] : tests[0];
+      return { css: t.css, source: 'test', test: t };
+    }
+    const c = cssCalc(parseD(dateStr));
+    return c ? { css: c.css, source: 'estimado', est: c } : null;
+  }
+
+
+  function testForm() {
+    return `<form class="race-form" data-form="test">
+      <div class="hint">Cómo se hace: entrada en calor suave de 400–600 m, <b>400 m a fondo</b>, 5–10 min suave, <b>200 m a fondo</b>. Repetilo siempre en la misma pileta y condiciones.</div>
+      <label>Fecha<input name="fecha" type="date" required max="${isoD(today())}"></label>
+      <div class="cols">
+        <label>400 m (m:ss)<input name="t400" required pattern="\\d+:\\d{2}([.,]\\d+)?" placeholder="6:10" inputmode="decimal"></label>
+        <label>200 m (m:ss)<input name="t200" required pattern="\\d+:\\d{2}([.,]\\d+)?" placeholder="2:55" inputmode="decimal"></label>
+      </div>
+      <div class="form-actions"><button type="submit" class="btn">Guardar test</button><button type="button" class="btn ghost" data-act="testCancel">Cancelar</button></div>
+      <div class="hint">Se guarda en este dispositivo. Para verlo en todos, se carga en <code>tests_css</code> de <code>config.json</code>.</div>
+    </form>`;
+  }
+
   const ZONES = [
     ['Velocidad', 'series cortas, muy rápido', -Infinity, -2, 'var(--z5)'],
     ['Umbral', 'el ritmo de tu CSS', -2, 3, 'var(--z4)'],
@@ -401,14 +450,198 @@
     ['Recuperación', 'suave, técnica', 15, Infinity, 'var(--z1)'],
   ];
   function paceCard() {
-    const c = cssCalc();
-    if (!c) return `<section class="card"><h2 class="card-title">Tus ritmos</h2><div class="empty">Necesito un 200 y un 400 de crol nadados de corrido para calcularlos.</div></section>`;
+    const c = cssAt();
+    const tests = cssTests();
+    const last = tests[tests.length - 1];
     const rng = (lo, hi) => (lo === -Infinity ? `< ${clock(c.css + hi)}` : hi === Infinity ? `> ${clock(c.css + lo)}` : `${clock(c.css + lo)}–${clock(c.css + hi)}`);
+    let src = '';
+    if (c && c.source === 'test') {
+      const weeks = Math.floor((today() - parseD(last.fecha)) / (7 * 864e5));
+      // ¿lo que nadás hoy es claramente más rápido que el test? Entonces el test quedó viejo.
+      const recent = cssCalc();
+      const outdated = recent && recent.css < last.css - 3;
+      src = `Test del ${shortDate(last.fecha)} (400 en ${clock(last.t400)}, 200 en ${clock(last.t200)})`
+        + (outdated ? `<br><b style="color:var(--buoy)">Hoy nadás más rápido (tus series rinden ~${clock(recent.css)}): hacé un test nuevo, las zonas quedaron lentas.</b>`
+          : weeks >= 6 ? `<br><b style="color:var(--buoy)">Hace ${weeks} semanas: conviene repetirlo</b>` : '');
+    } else if (c) {
+      src = (c.est.capped
+        ? `Estimado con tu mejor ${c.est.longKey} de corrido (${clock(c.est.long.t)}, ${shortDate(c.est.long.s.date)}).`
+        : `Estimado con tus mejores 400 (${clock(c.est.b400.t)}) y 200 (${clock(c.est.b200.t)}) dentro de sesiones.`)
+        + ' Un test formal es más preciso.';
+    }
+    const history = tests.length === 1 ? `<div class="hint">Tests: ${shortDate(tests[0].fecha)} ${new Date(tests[0].fecha).getFullYear()} — 400 en ${clock(tests[0].t400)}, 200 en ${clock(tests[0].t200)} → CSS ${clock(tests[0].css)}. Con el próximo test vas a ver la evolución.</div>` : tests.length >= 2 ? `<div class="stack" style="gap:4px"><div class="hint">Evolución del CSS · más abajo = más rápido</div>
+      ${spark(tests.map((t) => ({ v: t.css, label: shortDate(t.fecha) })), { color: 'var(--buoy)', fmt: (v) => `${clock(v)} /100m`, height: 48, label: 'Evolución del CSS en tus tests' })}</div>` : '';
     return `<section class="card">
-      <div class="card-head"><h2 class="card-title">Tus ritmos de crol</h2><span class="muted">/100 m</span></div>
-      <div class="css-head"><div><div class="muted">CSS · ritmo umbral</div><div class="big-num">${clock(c.css)}</div></div>
-        <div class="hint" style="text-align:right">Con tu mejor 400 (${clock(c.b400.t)}) y 200 (${clock(c.b200.t)})<br>${c.recent ? 'de los últimos 90 días' : 'históricos'}</div></div>
-      <div>${ZONES.map(([n, desc, lo, hi, col]) => `<div class="list-row zone-row"><span><i style="background:${col}"></i>${n} <span class="hint">${desc}</span></span><span class="big">${rng(lo, hi)}</span></div>`).join('')}</div>
+      <div class="card-head"><h2 class="card-title">Tus ritmos de crol</h2>${S.addTest ? '' : '<button type="button" class="link" data-act="testAdd">+ Cargar test</button>'}</div>
+      ${S.addTest ? testForm() : ''}
+      ${c ? `<div class="css-head"><div><div class="muted">CSS · ritmo umbral</div><div class="big-num">${clock(c.css)}</div></div>
+        <div class="hint" style="text-align:right;max-width:60%">${src}</div></div>
+      ${history}
+      <div>${ZONES.map(([n, desc, lo, hi, col]) => `<div class="list-row zone-row"><span><i style="background:${col}"></i>${n} <span class="hint">${desc}</span></span><span class="big">${rng(lo, hi)}</span></div>`).join('')}</div>`
+      : '<div class="empty">Cargá un test (400 m + 200 m a fondo) para calcular tu CSS y tus ritmos.</div>'}
+    </section>`;
+  }
+
+  // ───────── zonas, tipo de sesión y carga ─────────
+  /** Segundos de crol en cada zona (mismo orden que ZONES) según el CSS vigente ese día. */
+  function sessionZones(s) {
+    const c = cssAt(s.date);
+    if (!c || !s.pace_hist) return null;
+    const out = ZONES.map(() => 0);
+    for (const [p, secs] of Object.entries(s.pace_hist)) {
+      const d = Number(p) - c.css;
+      const i = ZONES.findIndex(([, , lo, hi]) => d >= lo && d < hi);
+      out[i < 0 ? ZONES.length - 1 : i] += secs;
+    }
+    return out;
+  }
+
+  const TYPES = {
+    Velocidad: 'var(--z5)', Umbral: 'var(--z4)', Fondo: '#7ab8ff', Aeróbico: 'var(--z2)', Técnica: 'var(--other)',
+  };
+  /** Tipo de sesión según dónde pasaste el tiempo. */
+  function sessionType(s) {
+    const z = sessionZones(s);
+    if (!z) return null;
+    const free = z.reduce((a, b) => a + b, 0);
+    const total = free + (s.other_s || 0) + (s.drill_s || 0);
+    if (!total) return null;
+    if (((s.other_s || 0) + (s.drill_s || 0)) / total >= 0.5) return 'Técnica';
+    if (!free) return 'Técnica';
+    const [vel, umb, tempo, aer] = z;
+    if (vel / free >= 0.15 && vel >= umb) return 'Velocidad';
+    if ((vel + umb) / free >= 0.3) return 'Umbral';
+    if ((s.longest_free_m || 0) >= 800 || ((tempo + aer) / free >= 0.6 && free >= 1200)) return 'Fondo';
+    return 'Aeróbico';
+  }
+  const typeBadge = (t) => (t ? `<span class="type-badge" style="--c:${TYPES[t]}">${t}</span>` : '');
+
+  /** Carga de la sesión (sTSS, estilo Swim Smooth): intensidad³ × horas × 100, intensidad = CSS / ritmo. */
+  function stss(s) {
+    const c = cssAt(s.date);
+    const mov = moving(s);
+    if (!c || !s.distance_m || !mov) return null;
+    const p = mov / (s.distance_m / 100);
+    return Math.pow(c.css / p, 3) * (mov / 3600) * 100;
+  }
+
+  /** Forma (promedio de 42 días), fatiga (7 días) y balance, día por día. */
+  function loadSeries() {
+    const sessions = S.swim.sessions;
+    if (!sessions.length) return [];
+    const daily = new Map();
+    for (const s of sessions) { const v = stss(s); if (v) daily.set(s.date, (daily.get(s.date) || 0) + v); }
+    let ctl = 0, atl = 0;
+    const out = [];
+    for (let d = parseD(sessions[0].date); d <= today(); d = addDays(d, 1)) {
+      const k = isoD(d), load = daily.get(k) || 0;
+      const tsb = ctl - atl; // balance con los valores del día anterior
+      ctl += (load - ctl) / 42;
+      atl += (load - atl) / 7;
+      out.push({ date: k, load, ctl, atl, tsb });
+    }
+    return out;
+  }
+
+  let multiId = 0;
+  /** Dos o más líneas en una misma escala, con lectura al tocar. */
+  function multiLine(points, series, { height = 110, label }) {
+    if (points.length < 2) return '<div class="empty">Todavía no hay datos suficientes</div>';
+    const id = `ml${++multiId}`;
+    const W = 300, H = height, P = 8;
+    const all = points.flatMap((p) => series.map((s) => p[s.key]));
+    const lo = Math.min(0, ...all), hi = Math.max(...all, 1);
+    const x = (i) => P + (i * (W - 2 * P)) / (points.length - 1);
+    const y = (v) => P + ((hi - v) * (H - 2 * P)) / (hi - lo);
+    const last = points.length - 1;
+    afterRender.push(() => {
+      const root = document.getElementById(id);
+      if (!root) return;
+      const svg = root.querySelector('svg'), rule = root.querySelector('.rule'), out = root.querySelector('.readout');
+      const dots = [...root.querySelectorAll('.dot')];
+      const show = (i) => {
+        dots.forEach((dot, k) => { dot.style.left = `${(100 * x(i)) / W}%`; dot.style.top = `${y(points[i][series[k].key])}px`; });
+        rule.setAttribute('x1', x(i)); rule.setAttribute('x2', x(i)); rule.style.opacity = i === last ? 0 : 1;
+        out.innerHTML = series.map((s) => `<b style="color:${s.color}">${s.name} ${nf(points[i][s.key])}</b>`).join(' · ') + ` · ${esc(shortDate(points[i].date))}`;
+      };
+      const at = (e) => { const r = svg.getBoundingClientRect(); show(Math.max(0, Math.min(last, Math.round((((e.clientX - r.left) / r.width) * W - P) / ((W - 2 * P) / last))))); };
+      svg.addEventListener('pointermove', at); svg.addEventListener('pointerdown', at); svg.addEventListener('pointerleave', () => show(last));
+      show(last);
+    });
+    return `<div class="spark" id="${id}">
+      <svg viewBox="0 0 ${W} ${H}" height="${H}" preserveAspectRatio="none" role="img" aria-label="${esc(label)}">
+        <line class="rule" x1="0" x2="0" y1="0" y2="${H}" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+        ${series.map((s) => `<polyline points="${points.map((p, i) => `${x(i).toFixed(1)},${y(p[s.key]).toFixed(1)}`).join(' ')}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`).join('')}
+      </svg>
+      ${series.map((s) => `<span class="dot" style="background:${s.color};border-color:${s.color}" aria-hidden="true"></span>`).join('')}
+      <div class="readout"></div>
+    </div>`;
+  }
+
+  function loadCard() {
+    const ser = loadSeries();
+    if (!ser.length) return '';
+    const now = ser[ser.length - 1];
+    const weekAgo = ser[Math.max(0, ser.length - 8)];
+    const ramp = now.ctl - weekAgo.ctl;
+    const sumDays = (from, to) => ser.filter((p) => p.date >= isoD(from) && p.date < isoD(to)).reduce((a, p) => a + p.load, 0);
+    const ws = monday(today());
+    const thisW = sumDays(ws, addDays(ws, 7)), lastW = sumDays(addDays(ws, -7), ws);
+    const tsb = now.ctl - now.atl;
+    const state = tsb < -20 ? ['bad', 'Mucha fatiga acumulada: sumá un día suave o de descanso.']
+      : tsb < -5 ? ['', 'Entrenando fuerte: la fatiga es esperable en un bloque de carga.']
+      : tsb <= 10 ? ['good', 'Fresco: buen momento para una sesión de calidad o un test.']
+      : ['', 'Muy descansado: ideal antes de una carrera; si dura semanas, estás perdiendo forma.'];
+    const pts = ser.slice(-90).map((p) => ({ date: p.date, Forma: p.ctl, Fatiga: p.atl }));
+    return `<section class="card wide">
+      <div class="card-head"><h2 class="card-title">Carga, forma y fatiga</h2><span class="hint">sTSS</span></div>
+      <div class="cols-3">
+        <div><div class="muted">Forma</div><div class="big-num" style="color:var(--teal)">${nf(now.ctl)}</div><div class="hint">promedio de 6 semanas</div></div>
+        <div><div class="muted">Fatiga</div><div class="big-num" style="color:var(--sand)">${nf(now.atl)}</div><div class="hint">última semana</div></div>
+        <div><div class="muted">Balance</div><div class="big-num">${tsb > 0 ? '+' : ''}${nf(tsb)}</div><div class="hint">forma − fatiga</div></div>
+      </div>
+      <div class="muted delta ${state[0]}">${state[1]}</div>
+      ${multiLine(pts, [{ key: 'Forma', name: 'Forma', color: 'var(--teal)' }, { key: 'Fatiga', name: 'Fatiga', color: 'var(--sand)' }], { label: 'Forma y fatiga, últimos 90 días' })}
+      <div class="legend"><span><i style="background:var(--teal)"></i>Forma</span><span><i style="background:var(--sand)"></i>Fatiga</span><span>últimos 90 días</span></div>
+      <div class="muted">Carga esta semana: <b style="color:var(--text)">${nf(thisW)}</b> · semana pasada: ${nf(lastW)}${ramp > 5 ? ` · <b style="color:var(--bad)">la forma subió ${nf(ramp)} en 7 días: vas rápido, ojo con lesiones</b>` : ''}</div>
+      <div class="hint">Cada sesión suma carga según cuánto y qué tan cerca de tu CSS nadaste: ~40 es suave, 70–80 exigente, 100+ te deja cansado unos días. La forma sube con constancia; la fatiga baja con descanso.</div>
+    </section>`;
+  }
+
+  /** Mezcla de las últimas semanas: minutos por zona + técnica, y qué faltó esta semana. */
+  function weekMixCard() {
+    const weeks = 6, start = addDays(monday(today()), -7 * (weeks - 1));
+    const cols = [...ZONES.map(([n, , , , c]) => ({ n, c })), { n: 'Técnica y otros', c: 'var(--other)' }];
+    const data = [];
+    for (let w = 0; w < weeks; w++) {
+      const from = addDays(start, 7 * w), to = addDays(from, 7);
+      const ss = S.swim.sessions.filter((s) => { const d = parseD(s.date); return d >= from && d < to; });
+      const mins = cols.map(() => 0);
+      const types = {};
+      for (const s of ss) {
+        const z = sessionZones(s);
+        if (z) z.forEach((v, i) => { mins[i] += v / 60; });
+        mins[cols.length - 1] += ((s.other_s || 0) + (s.drill_s || 0)) / 60;
+        const t = sessionType(s);
+        if (t) types[t] = (types[t] || 0) + 1;
+      }
+      data.push({ from, mins, total: mins.reduce((a, b) => a + b, 0), types, n: ss.length });
+    }
+    const max = Math.max(...data.map((d) => d.total), 1);
+    const cur = data[data.length - 1];
+    const missing = [];
+    if (!cur.types.Umbral && !cur.types.Velocidad) missing.push('una sesión de umbral');
+    if (!cur.types.Fondo) missing.push('una tirada de fondo');
+    if (cur.n < 3) missing.push(`${3 - cur.n} ${3 - cur.n === 1 ? 'sesión' : 'sesiones'} más (3 por semana)`);
+    const typesTxt = Object.entries(cur.types).map(([t, k]) => `${k} ${t.toLowerCase()}`).join(', ');
+    return `<section class="card">
+      <div class="card-head"><h2 class="card-title">Tu semana de entrenamiento</h2><span class="hint">minutos por zona</span></div>
+      <div class="muted">Esta semana: ${typesTxt || 'todavía nada'}.${missing.length ? ` <b style="color:var(--text)">Te falta: ${missing.join(', ')}.</b>` : ' <b style="color:var(--good)">Semana completa.</b>'}</div>
+      <div class="mix" role="img" aria-label="Minutos por zona en las últimas 6 semanas">${data.map((d, i) => `<div class="mix-col ${i === data.length - 1 ? 'cur' : ''}" data-tip="${esc(`Semana del ${shortDate(isoD(d.from))}\n${cols.map((c, k) => d.mins[k] >= 1 ? `${c.n}: ${nf(d.mins[k])} min` : '').filter(Boolean).join('\n') || 'Sin sesiones'}`)}">
+        <div class="mix-bar" style="height:${(100 * d.total) / max}%">${cols.map((c, k) => d.mins[k] > 0 ? `<span style="flex:${d.mins[k]} 1 0;background:${c.c}"></span>` : '').reverse().join('')}</div>
+        <div class="hint">${d.from.getDate()}/${d.from.getMonth() + 1}</div></div>`).join('')}</div>
+      <div class="legend">${cols.map((c) => `<span><i style="background:${c.c}"></i>${c.n}</span>`).join('')}</div>
+      <div class="hint">Una semana completa para tu objetivo: una sesión de umbral, una tirada de fondo y una de velocidad o técnica. Las zonas salen de tu CSS.</div>
     </section>`;
   }
 
@@ -786,6 +1019,8 @@
           ${swolfSpark}
           <div class="hint">Segundos + brazadas en cada pileta.</div>
         </section>` : ''}
+        ${weekMixCard()}
+        ${loadCard()}
         ${pool ? pacingCard(cur) : ''}
         ${pool ? efficiencyCard(cur, prev) : ''}
         ${pool ? prCard(rows) : ''}
@@ -816,7 +1051,7 @@
       ['SWOLF', s.swolf ?? '—', 'var(--sand)'],
       ['FC prom.', s.avg_hr ?? '—'],
       ['Frec. crol', strokeRate(s) ? `${nf(strokeRate(s))}/min` : '—'],
-      ['Calorías', s.calories ?? '—'],
+      ['Carga', stss(s) ? nf(stss(s)) : '—', 'var(--buoy)'],
     ].map(([l, v, c]) => `<div><div class="label">${l}</div><div class="value" ${c ? `style="color:${c}"` : ''}>${v}</div></div>`).join('');
 
     // estilos
@@ -895,7 +1130,7 @@
       <section class="hero">
         <a class="back" href="#/natacion">${ICON.back}Natación</a>
         <div>
-          <div class="eyebrow">${dayLabel(s.date)} · ${s.time} · ${isPool ? `Pileta ${s.pool_m || 25} m` : 'Aguas abiertas'}</div>
+          <div class="eyebrow">${dayLabel(s.date)} · ${s.time} · ${isPool ? `Pileta ${s.pool_m || 25} m` : 'Aguas abiertas'}${sessionType(s) ? ` · ${sessionType(s)}` : ''}</div>
           <h1>${esc(s.name || 'Natación')}</h1>
         </div>
         <div>
@@ -908,8 +1143,21 @@
       <section class="card"><div class="stats">${stats}</div></section>
       <div class="split">
         ${loading ? '<div class="empty wide">Cargando detalle…</div>' : ''}
-        ${lapsHtml}${strokesHtml}${zonesHtml}${tableHtml}
+        ${lapsHtml}${paceZonesHtml(s)}${strokesHtml}${zonesHtml}${tableHtml}
       </div>`;
+  }
+
+  function paceZonesHtml(s) {
+    const z = sessionZones(s);
+    if (!z || !z.some(Boolean)) return '';
+    const tot = z.reduce((a, b) => a + b, 0);
+    const c = cssAt(s.date);
+    return `<section class="card">
+      <div class="card-head"><h2 class="card-title">Zonas de ritmo</h2><span class="hint">crol · CSS ${clock(c.css)}</span></div>
+      <div class="split-bar tall">${z.map((v, i) => v ? `<span style="flex:${v} 1 0;background:${ZONES[i][4]}" data-tip="${esc(`${ZONES[i][0]}\n${clock(v)} (${Math.round((100 * v) / tot)}%)`)}"></span>` : '').join('')}</div>
+      <div>${z.map((v, i) => v ? `<div class="list-row zone-row"><span><i style="background:${ZONES[i][4]}"></i>${ZONES[i][0]}</span><span class="muted">${Math.round((100 * v) / tot)}%</span><span class="big">${clock(v)}</span></div>` : '').join('')}</div>
+      ${sessionType(s) ? `<div class="muted">Tipo de sesión: ${typeBadge(sessionType(s))}</div>` : ''}
+    </section>`;
   }
 
   // ───────── vista: golf ─────────
@@ -1066,6 +1314,7 @@
     hideTip();
     afterRender = [];
     sparkId = 0;
+    multiId = 0;
     const { page, id } = route();
     let html;
     if (page === 'natacion') html = id ? viewSesion(id) : viewNatacion();
@@ -1124,6 +1373,8 @@
     if (act === 'more') S.shown += 20;
     if (act === 'raceEdit') S.editRace = true;
     if (act === 'raceCancel') S.editRace = false;
+    if (act === 'testAdd') S.addTest = true;
+    if (act === 'testCancel') S.addTest = false;
     render();
   });
   document.addEventListener('change', (e) => {
@@ -1131,6 +1382,17 @@
     if (sel && sel.value) location.hash = `#/${sel.dataset.goto}/${sel.value}`;
   });
   document.addEventListener('submit', (e) => {
+    const tform = e.target.closest('[data-form="test"]');
+    if (tform) {
+      e.preventDefault();
+      const f = new FormData(tform);
+      const t400 = parseClock(f.get('t400')), t200 = parseClock(f.get('t200'));
+      if (!t400 || !t200 || t400 <= t200) { alert('Revisá los tiempos: el formato es m:ss y el 400 tiene que ser más largo que el 200.'); return; }
+      store.set('tp:tests', [...store.get('tp:tests', []), { fecha: String(f.get('fecha')), t400, t200, local: true }]);
+      S.addTest = false;
+      render();
+      return;
+    }
     const form = e.target.closest('[data-form="race"]');
     if (!form) return;
     e.preventDefault();
