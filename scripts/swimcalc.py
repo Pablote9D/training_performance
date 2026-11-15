@@ -139,6 +139,48 @@ def normalize_strokes(intervals: list[dict[str, Any]], share: float = DOMINANT_S
     return out
 
 
+def pace_profile(intervals: list[dict[str, Any]]) -> dict[str, Any]:
+    """Cuánto tiempo se nadó a cada ritmo, para calcular zonas y clasificar la sesión.
+
+    - `pace_hist`: segundos de crol por ritmo /100 m (redondeado al segundo), solo piletas válidas.
+    - `free_s`, `other_s`: segundos de crol y de otros estilos (piletas válidas).
+    - `drill_s`: segundos de técnica (duración de los intervalos de técnica).
+    - `longest_free_m`: el tramo de crol de corrido más largo (piletas válidas de un intervalo).
+    """
+    # piletas de crol >30% más rápidas que la mediana de la sesión: casi seguro errores del reloj
+    free_paces = sorted(100 * ln["t"] / ln["d"] for it in intervals if it.get("kind") == "active"
+                        for ln in it.get("lengths") or [] if ln.get("stroke") == FREESTYLE and valid_length(ln))
+    floor = 0.7 * free_paces[len(free_paces) // 2] if free_paces else 0
+    hist: dict[str, float] = {}
+    free_s = other_s = drill_s = 0.0
+    longest = 0.0
+    for it in intervals:
+        if it.get("kind") != "active":
+            continue
+        if it.get("stroke") == "técnica":
+            drill_s += it.get("duration_s") or 0
+            continue
+        run = 0.0
+        for ln in it.get("lengths") or []:
+            st = ln.get("stroke")
+            if st == "técnica":
+                drill_s += ln.get("t") or 0
+                continue
+            if not valid_length(ln):
+                continue
+            if st == FREESTYLE:
+                if 100 * ln["t"] / ln["d"] < floor:
+                    continue
+                key = str(round(100 * ln["t"] / ln["d"]))
+                hist[key] = round(hist.get(key, 0) + ln["t"], 1)
+                free_s += ln["t"]
+                run += ln["d"]
+            else:
+                other_s += ln["t"]
+        longest = max(longest, run if all(ln.get("stroke") == FREESTYLE for ln in (it.get("lengths") or []) if valid_length(ln)) else 0)
+    return {"pace_hist": hist, "free_s": round(free_s), "other_s": round(other_s), "drill_s": round(drill_s), "longest_free_m": round(longest)}
+
+
 def derive(intervals: list[dict[str, Any]]) -> dict[str, Any]:
     """Campos de resumen que se calculan a partir del detalle de una sesión."""
     intervals = normalize_strokes(intervals)
@@ -147,4 +189,5 @@ def derive(intervals: list[dict[str, Any]]) -> dict[str, Any]:
         "best_free": best_efforts(intervals, FREESTYLE),
         "by_stroke": by_stroke(intervals),
         "splits": long_set_splits(intervals),
+        **pace_profile(intervals),
     }
