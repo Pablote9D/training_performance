@@ -415,20 +415,19 @@
     return all.filter((t) => { const k = `${t.fecha}|${t.t400}|${t.t200}`; if (seen.has(k)) return false; seen.add(k); return true; })
       .sort((a, b) => a.fecha.localeCompare(b.fecha));
   }
-  const TEST_VALID_DAYS = 84; // un test describe tu nivel unas 12 semanas; después manda lo que nadás
-  /** CSS vigente en una fecha: el último test de las 12 semanas previas; si no hay, el estimado con
-   *  tus mejores tiempos recientes; y como último recurso, el test más cercano. */
+  /** CSS vigente en una fecha: el último test real hasta esa fecha (o el primero, para sesiones anteriores).
+   *  Solo sin ningún test cargado se usa un CSS estimado con tus mejores tiempos. */
   function cssAt(dateStr = isoD(today())) {
     const tests = cssTests();
-    const d = parseD(dateStr);
-    const prior = tests.filter((t) => t.fecha <= dateStr);
-    const last = prior[prior.length - 1];
-    if (last && (d - parseD(last.fecha)) / 864e5 <= TEST_VALID_DAYS) return { css: last.css, source: 'test', test: last };
-    const c = cssCalc(d);
-    if (c) return { css: c.css, source: 'estimado', est: c, oldTest: last };
-    const t = last || tests[0];
-    return t ? { css: t.css, source: 'test', test: t } : null;
+    if (tests.length) {
+      const prior = tests.filter((t) => t.fecha <= dateStr);
+      const t = prior.length ? prior[prior.length - 1] : tests[0];
+      return { css: t.css, source: 'test', test: t };
+    }
+    const c = cssCalc(parseD(dateStr));
+    return c ? { css: c.css, source: 'estimado', est: c } : null;
   }
+
 
   function testForm() {
     return `<form class="race-form" data-form="test">
@@ -458,12 +457,17 @@
     let src = '';
     if (c && c.source === 'test') {
       const weeks = Math.floor((today() - parseD(last.fecha)) / (7 * 864e5));
-      src = `Test del ${shortDate(last.fecha)} (400 en ${clock(last.t400)}, 200 en ${clock(last.t200)})${weeks >= 6 ? `<br><b style="color:var(--buoy)">Hace ${weeks} semanas: conviene repetirlo</b>` : ''}`;
+      // ¿lo que nadás hoy es claramente más rápido que el test? Entonces el test quedó viejo.
+      const recent = cssCalc();
+      const outdated = recent && recent.css < last.css - 3;
+      src = `Test del ${shortDate(last.fecha)} (400 en ${clock(last.t400)}, 200 en ${clock(last.t200)})`
+        + (outdated ? `<br><b style="color:var(--buoy)">Hoy nadás más rápido (tus series rinden ~${clock(recent.css)}): hacé un test nuevo, las zonas quedaron lentas.</b>`
+          : weeks >= 6 ? `<br><b style="color:var(--buoy)">Hace ${weeks} semanas: conviene repetirlo</b>` : '');
     } else if (c) {
       src = (c.est.capped
         ? `Estimado con tu mejor ${c.est.longKey} de corrido (${clock(c.est.long.t)}, ${shortDate(c.est.long.s.date)}).`
         : `Estimado con tus mejores 400 (${clock(c.est.b400.t)}) y 200 (${clock(c.est.b200.t)}) dentro de sesiones.`)
-        + (c.oldTest ? `<br>Tu último test (${shortDate(c.oldTest.fecha)}, CSS ${clock(c.oldTest.css)}) tiene más de 12 semanas. <b style="color:var(--buoy)">Hacé uno nuevo</b>.` : ' Un test formal es más preciso.');
+        + ' Un test formal es más preciso.';
     }
     const history = tests.length === 1 ? `<div class="hint">Tests: ${shortDate(tests[0].fecha)} ${new Date(tests[0].fecha).getFullYear()} — 400 en ${clock(tests[0].t400)}, 200 en ${clock(tests[0].t200)} → CSS ${clock(tests[0].css)}. Con el próximo test vas a ver la evolución.</div>` : tests.length >= 2 ? `<div class="stack" style="gap:4px"><div class="hint">Evolución del CSS · más abajo = más rápido</div>
       ${spark(tests.map((t) => ({ v: t.css, label: shortDate(t.fecha) })), { color: 'var(--buoy)', fmt: (v) => `${clock(v)} /100m`, height: 48, label: 'Evolución del CSS en tus tests' })}</div>` : '';
