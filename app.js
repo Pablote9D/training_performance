@@ -442,43 +442,74 @@
     </form>`;
   }
 
+  /** 7 zonas de ritmo relativas al CSS (segundos cada 100 m), de la más suave (Z1) a la más rápida (Z7). */
   const ZONES = [
-    ['Velocidad', 'series cortas, muy rápido', -Infinity, -2, 'var(--z5)'],
-    ['Umbral', 'el ritmo de tu CSS', -2, 3, 'var(--z4)'],
-    ['Tempo', 'ritmo de carrera larga', 3, 8, 'var(--z3)'],
-    ['Aeróbico', 'base, volumen', 8, 15, 'var(--z2)'],
-    ['Recuperación', 'suave, técnica', 15, Infinity, 'var(--z1)'],
+    ['Z1 · Recuperación', 'entrada en calor, vuelta a la calma', 15, Infinity, 'var(--z1)'],
+    ['Z2 · Aeróbico', 'base y fondo largo', 8, 15, 'var(--z2)'],
+    ['Z3 · Tempo', 'ritmo de carrera de 2 km o más', 3, 8, 'var(--z3)'],
+    ['Z4 · Umbral', 'tu CSS: series de 200 a 1.000 m', -2, 3, 'var(--z4)'],
+    ['Z5 · VO2 máx', 'series de 100 a 400 m, pausas largas', -6, -2, 'var(--z5)'],
+    ['Z6 · Anaeróbico', 'series de 50 a 100 m', -10, -6, 'var(--z6)'],
+    ['Z7 · Sprint', '25 a 50 m a máxima velocidad', -Infinity, -10, 'var(--z7)'],
   ];
+  const zoneShort = (i) => ZONES[i][0].split(' · ')[0];
+
+  /** Escala de ritmos: las 7 zonas de lenta (izquierda) a rápida (derecha), con el CSS y los tiempos del test. */
+  /** Zona (índice) de un ritmo dado el CSS. */
+  const zoneOf = (css, v) => Math.max(0, ZONES.findIndex(([, , lo, hi]) => v - css >= lo && v - css < hi));
+
+  /** Escala de ritmos: las 7 zonas de lenta (izquierda) a rápida (derecha), con el CSS marcado
+   *  y debajo los ritmos de referencia (test, hoy) con la zona en la que caen. */
+  function zoneSpectrum(css, marks) {
+    const slow = css + 24, fast = css - 14; // escala fija alrededor del CSS
+    const pos = (v) => Math.max(0, Math.min(100, (100 * (slow - v)) / (slow - fast)));
+    const segs = ZONES.map(([, , lo, hi, col], i) => {
+      const a = Math.min(slow, css + hi), b = Math.max(fast, css + lo);
+      return { i, col, w: Math.max(0, pos(b) - pos(a)), lo, hi };
+    });
+    const rng = (lo, hi) => (lo === -Infinity ? `más rápido que ${clock(css + hi)}` : hi === Infinity ? `más lento que ${clock(css + lo)}` : `${clock(css + hi)} a ${clock(css + lo)}`);
+    return `<div class="spectrum" role="img" aria-label="Escala de ritmos de Z1 a Z7 según tu CSS de ${clock(css)}">
+        <div class="spec-marks"><span class="mk" style="left:${pos(css)}%">▼ <b>CSS</b> ${clock(css)}</span></div>
+        <div class="spec-bar">${segs.map((g) => `<span style="width:${g.w}%;background:${g.col}" data-tip="${esc(`${ZONES[g.i][0]}\n${rng(g.lo, g.hi)} /100m`)}">${g.w > 6 ? zoneShort(g.i) : ''}</span>`).join('')}</div>
+        <div class="axis"><span>← más lento</span><span>más rápido →</span></div>
+        ${marks.length ? `<div class="spec-refs">${marks.map((m) => `<span><i style="background:${ZONES[zoneOf(css, m.v)][4]}"></i>${esc(m.label)}: <b>${clock(m.v)}</b> /100m · ${zoneShort(zoneOf(css, m.v))}</span>`).join('')}</div>` : ''}
+      </div>`;
+  }
+
   function paceCard() {
     const c = cssAt();
     const tests = cssTests();
     const last = tests[tests.length - 1];
-    const rng = (lo, hi) => (lo === -Infinity ? `< ${clock(c.css + hi)}` : hi === Infinity ? `> ${clock(c.css + lo)}` : `${clock(c.css + lo)}–${clock(c.css + hi)}`);
-    let src = '';
+    const rng = (lo, hi) => (lo === -Infinity ? `< ${clock(c.css + hi)}` : hi === Infinity ? `> ${clock(c.css + lo)}` : `${clock(c.css + hi)}–${clock(c.css + lo)}`);
+    const recent = cssCalc();
+    let src = '', alertBox = '';
     if (c && c.source === 'test') {
       const weeks = Math.floor((today() - parseD(last.fecha)) / (7 * 864e5));
-      // ¿lo que nadás hoy es claramente más rápido que el test? Entonces el test quedó viejo.
-      const recent = cssCalc();
       const outdated = recent && recent.css < last.css - 3;
-      src = `Test del ${shortDate(last.fecha)} (400 en ${clock(last.t400)}, 200 en ${clock(last.t200)})`
-        + (outdated ? `<br><b style="color:var(--buoy)">Hoy nadás más rápido (tus series rinden ~${clock(recent.css)}): hacé un test nuevo, las zonas quedaron lentas.</b>`
-          : weeks >= 6 ? `<br><b style="color:var(--buoy)">Hace ${weeks} semanas: conviene repetirlo</b>` : '');
+      src = `Test del ${shortDate(last.fecha)} ${parseD(last.fecha).getFullYear()}: 400 en ${clock(last.t400)}, 200 en ${clock(last.t200)}.`;
+      if (outdated) alertBox = `Hoy nadás más rápido que este test (tus series rinden ~${clock(recent.css)}): las zonas quedaron lentas. Hacé un test nuevo.`;
+      else if (weeks >= 6) alertBox = `Pasaron ${weeks} semanas desde el último test: conviene repetirlo.`;
     } else if (c) {
       src = (c.est.capped
         ? `Estimado con tu mejor ${c.est.longKey} de corrido (${clock(c.est.long.t)}, ${shortDate(c.est.long.s.date)}).`
-        : `Estimado con tus mejores 400 (${clock(c.est.b400.t)}) y 200 (${clock(c.est.b200.t)}) dentro de sesiones.`)
-        + ' Un test formal es más preciso.';
+        : `Estimado con tus mejores 400 y 200 dentro de sesiones.`) + ' Un test formal es más preciso.';
+      alertBox = 'Todavía no cargaste ningún test: estas zonas son una estimación.';
     }
-    const history = tests.length === 1 ? `<div class="hint">Tests: ${shortDate(tests[0].fecha)} ${new Date(tests[0].fecha).getFullYear()} — 400 en ${clock(tests[0].t400)}, 200 en ${clock(tests[0].t200)} → CSS ${clock(tests[0].css)}. Con el próximo test vas a ver la evolución.</div>` : tests.length >= 2 ? `<div class="stack" style="gap:4px"><div class="hint">Evolución del CSS · más abajo = más rápido</div>
+    const marks = [];
+    if (c && c.source === 'test') { marks.push({ label: 'Tu 400 del test', v: last.t400 / 4 }); marks.push({ label: 'Tu 200 del test', v: last.t200 / 2 }); }
+    if (c && c.source === 'test' && recent && Math.abs(recent.css - c.css) > 3) marks.push({ label: 'Tus series hoy', v: recent.css });
+    const history = tests.length >= 2 ? `<div class="stack" style="gap:4px"><div class="hint">Evolución del CSS · más abajo = más rápido</div>
       ${spark(tests.map((t) => ({ v: t.css, label: shortDate(t.fecha) })), { color: 'var(--buoy)', fmt: (v) => `${clock(v)} /100m`, height: 48, label: 'Evolución del CSS en tus tests' })}</div>` : '';
-    return `<section class="card">
-      <div class="card-head"><h2 class="card-title">Tus ritmos de crol</h2>${S.addTest ? '' : '<button type="button" class="link" data-act="testAdd">+ Cargar test</button>'}</div>
-      ${S.addTest ? testForm() : ''}
+    return `<section class="card wide test-card">
+      <div class="card-head"><h2 class="card-title">Test de CSS y zonas de ritmo</h2><span class="muted">crol · /100 m</span></div>
+      ${S.addTest ? testForm() : `<button type="button" class="btn test-btn" data-act="testAdd">+ Cargar resultado de un test</button>`}
+      ${alertBox && !S.addTest ? `<div class="banner">${ICON.info}<div>${alertBox}</div></div>` : ''}
       ${c ? `<div class="css-head"><div><div class="muted">CSS · ritmo umbral</div><div class="big-num">${clock(c.css)}</div></div>
         <div class="hint" style="text-align:right;max-width:60%">${src}</div></div>
-      ${history}
-      <div>${ZONES.map(([n, desc, lo, hi, col]) => `<div class="list-row zone-row"><span><i style="background:${col}"></i>${n} <span class="hint">${desc}</span></span><span class="big">${rng(lo, hi)}</span></div>`).join('')}</div>`
-      : '<div class="empty">Cargá un test (400 m + 200 m a fondo) para calcular tu CSS y tus ritmos.</div>'}
+      ${zoneSpectrum(c.css, marks)}
+
+      <div>${ZONES.map(([n, desc, lo, hi, col]) => `<div class="list-row zone-row"><span><i style="background:${col}"></i>${n}<br><span class="hint">${desc}</span></span><span class="big">${rng(lo, hi)}</span></div>`).join('')}</div>
+      ${history}` : '<div class="empty">Cargá un test (400 m + 200 m a fondo) para calcular tu CSS y tus zonas.</div>'}
     </section>`;
   }
 
@@ -491,7 +522,7 @@
     for (const [p, secs] of Object.entries(s.pace_hist)) {
       const d = Number(p) - c.css;
       const i = ZONES.findIndex(([, , lo, hi]) => d >= lo && d < hi);
-      out[i < 0 ? ZONES.length - 1 : i] += secs;
+      out[i < 0 ? 0 : i] += secs;
     }
     return out;
   }
@@ -508,7 +539,8 @@
     if (!total) return null;
     if (((s.other_s || 0) + (s.drill_s || 0)) / total >= 0.5) return 'Técnica';
     if (!free) return 'Técnica';
-    const [vel, umb, tempo, aer] = z;
+    const [, aer, tempo, umb, z5, z6, z7] = z;
+    const vel = z5 + z6 + z7;
     if (vel / free >= 0.15 && vel >= umb) return 'Velocidad';
     if ((vel + umb) / free >= 0.3) return 'Umbral';
     if ((s.longest_free_m || 0) >= 800 || ((tempo + aer) / free >= 0.6 && free >= 1200)) return 'Fondo';
@@ -1007,9 +1039,9 @@
       </div>
       <section class="cols-3">${kpis}</section>
       <div class="split">
+        ${paceCard()}
         ${raceCard()}
         ${volumeChart(rows)}
-        ${pool ? paceCard() : ''}
         <section class="card">
           <div class="card-head"><h2 class="card-title">Ritmo /100 m</h2><span class="hint">más abajo = más rápido</span></div>
           ${paceSpark}
