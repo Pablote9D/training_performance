@@ -18,7 +18,7 @@
   --sand: #ffc078;          /* SWOLF */
   --good: #7fe3a0;
   --bad: #ff9a8a;
-  --z1: #5fd4c4; --z2: #7fe3a0; --z3: #ffd84d; --z4: #ff9a3d; --z5: #ff5d7a;
+  --z1: #5fd4c4; --z2: #7fe3a0; --z3: #ffd84d; --z4: #ff9a3d; --z5: #ff5d7a; --z6: #e46bdc; --z7: #a98bff;
   --radius: 18px;
   --radius-sm: 14px;
   --nav-h: 64px;
@@ -288,6 +288,21 @@ code { font-size: .92em; background: var(--card-2); padding: 1px 5px; border-rad
 .mix-bar span { display: block; width: 100%; min-height: 2px; }
 .mix-col.cur .hint { color: var(--buoy); font-weight: 700; }
 .mix-col.on .mix-bar { outline: 2px solid var(--text); outline-offset: 1px; }
+
+/* test de CSS: escala de zonas */
+.test-btn { width: 100%; }
+.spectrum { display: flex; flex-direction: column; gap: 4px; padding: 4px 0; }
+.spec-bar { position: relative; display: flex; height: 34px; border-radius: 10px; overflow: hidden; }
+.spec-bar span { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--bg); min-width: 0; overflow: hidden; cursor: pointer; }
+.spec-bar .tick { position: absolute; top: -2px; bottom: -2px; width: 3px; margin-left: -1.5px; background: var(--text); border-radius: 2px; box-shadow: 0 0 0 1px var(--bg); }
+.spec-marks { position: relative; height: 18px; font-size: 11px; color: var(--text-2); }
+.spec-marks .mk { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.spec-marks .mk:first-child { transform: translateX(-50%); }
+.spec-marks .mk b { color: var(--text); }
+.zone-row .big { white-space: nowrap; }
+.spec-refs { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-2); margin-top: 6px; }
+.spec-refs i { display: inline-block; width: 10px; height: 10px; border-radius: 5px; margin-right: 8px; }
+.spec-refs b { color: var(--text); }
 
 /* ───────── tooltip ───────── */
 .tip { position: fixed; z-index: 20; pointer-events: none; background: var(--text); color: var(--bg); border-radius: 10px; padding: 8px 10px; font-size: 12px; line-height: 1.35; box-shadow: 0 6px 20px rgba(0, 0, 0, .4); max-width: 220px; }
