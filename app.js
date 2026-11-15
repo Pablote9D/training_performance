@@ -304,8 +304,13 @@
     let b = freeBests(poolUntil(ref, 90)), recent = true;
     if (!b['200'] || !b['400']) { b = freeBests(poolUntil(ref, 0)); recent = false; }
     if (!b['200'] || !b['400']) return null;
-    const css = (b['400'].t - b['200'].t) / 2;
-    return css > 0 ? { css, b200: b['200'], b400: b['400'], recent } : null;
+    let css = (b['400'].t - b['200'].t) / 2;
+    // el CSS es el ritmo sostenible ~30 min: no puede ser más lento que un 800/1500 que ya nadaste
+    const longKey = ['1500', '800'].find((k) => b[k]);
+    const cap = longKey ? b[longKey].t / (Number(longKey) / 100) : null;
+    const capped = cap != null && cap < css;
+    if (capped) css = cap;
+    return css > 0 ? { css, b200: b['200'], b400: b['400'], recent, capped, longKey, long: longKey ? b[longKey] : null } : null;
   }
 
   const OW_FACTOR = 1.05; // aguas abiertas: sin paredes ni vueltas, orientación, oleaje
@@ -410,16 +415,19 @@
     return all.filter((t) => { const k = `${t.fecha}|${t.t400}|${t.t200}`; if (seen.has(k)) return false; seen.add(k); return true; })
       .sort((a, b) => a.fecha.localeCompare(b.fecha));
   }
-  /** CSS vigente en una fecha: el último test hasta esa fecha; si no hay, el primero; si no hay tests, el estimado. */
+  const TEST_VALID_DAYS = 84; // un test describe tu nivel unas 12 semanas; después manda lo que nadás
+  /** CSS vigente en una fecha: el último test de las 12 semanas previas; si no hay, el estimado con
+   *  tus mejores tiempos recientes; y como último recurso, el test más cercano. */
   function cssAt(dateStr = isoD(today())) {
     const tests = cssTests();
-    if (tests.length) {
-      const prior = tests.filter((t) => t.fecha <= dateStr);
-      const t = prior.length ? prior[prior.length - 1] : tests[0];
-      return { css: t.css, source: 'test', test: t };
-    }
-    const c = cssCalc(parseD(dateStr));
-    return c ? { css: c.css, source: 'estimado', est: c } : null;
+    const d = parseD(dateStr);
+    const prior = tests.filter((t) => t.fecha <= dateStr);
+    const last = prior[prior.length - 1];
+    if (last && (d - parseD(last.fecha)) / 864e5 <= TEST_VALID_DAYS) return { css: last.css, source: 'test', test: last };
+    const c = cssCalc(d);
+    if (c) return { css: c.css, source: 'estimado', est: c, oldTest: last };
+    const t = last || tests[0];
+    return t ? { css: t.css, source: 'test', test: t } : null;
   }
 
   function testForm() {
@@ -452,9 +460,12 @@
       const weeks = Math.floor((today() - parseD(last.fecha)) / (7 * 864e5));
       src = `Test del ${shortDate(last.fecha)} (400 en ${clock(last.t400)}, 200 en ${clock(last.t200)})${weeks >= 6 ? `<br><b style="color:var(--buoy)">Hace ${weeks} semanas: conviene repetirlo</b>` : ''}`;
     } else if (c) {
-      src = `Estimado con tus mejores 400 (${clock(c.est.b400.t)}) y 200 (${clock(c.est.b200.t)}) dentro de sesiones. Un test formal es más preciso.`;
+      src = (c.est.capped
+        ? `Estimado con tu mejor ${c.est.longKey} de corrido (${clock(c.est.long.t)}, ${shortDate(c.est.long.s.date)}).`
+        : `Estimado con tus mejores 400 (${clock(c.est.b400.t)}) y 200 (${clock(c.est.b200.t)}) dentro de sesiones.`)
+        + (c.oldTest ? `<br>Tu último test (${shortDate(c.oldTest.fecha)}, CSS ${clock(c.oldTest.css)}) tiene más de 12 semanas. <b style="color:var(--buoy)">Hacé uno nuevo</b>.` : ' Un test formal es más preciso.');
     }
-    const history = tests.length >= 2 ? `<div class="stack" style="gap:4px"><div class="hint">Evolución del CSS · más abajo = más rápido</div>
+    const history = tests.length === 1 ? `<div class="hint">Tests: ${shortDate(tests[0].fecha)} ${new Date(tests[0].fecha).getFullYear()} — 400 en ${clock(tests[0].t400)}, 200 en ${clock(tests[0].t200)} → CSS ${clock(tests[0].css)}. Con el próximo test vas a ver la evolución.</div>` : tests.length >= 2 ? `<div class="stack" style="gap:4px"><div class="hint">Evolución del CSS · más abajo = más rápido</div>
       ${spark(tests.map((t) => ({ v: t.css, label: shortDate(t.fecha) })), { color: 'var(--buoy)', fmt: (v) => `${clock(v)} /100m`, height: 48, label: 'Evolución del CSS en tus tests' })}</div>` : '';
     return `<section class="card">
       <div class="card-head"><h2 class="card-title">Tus ritmos de crol</h2>${S.addTest ? '' : '<button type="button" class="link" data-act="testAdd">+ Cargar test</button>'}</div>

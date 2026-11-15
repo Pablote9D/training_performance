@@ -161,6 +161,7 @@ def pace_profile(intervals: list[dict[str, Any]]) -> dict[str, Any]:
             drill_s += it.get("duration_s") or 0
             continue
         run = 0.0
+        free_t = 0.0
         for ln in it.get("lengths") or []:
             st = ln.get("stroke")
             if st == "técnica":
@@ -171,12 +172,16 @@ def pace_profile(intervals: list[dict[str, Any]]) -> dict[str, Any]:
             if st == FREESTYLE:
                 if 100 * ln["t"] / ln["d"] < floor:
                     continue
-                key = str(round(100 * ln["t"] / ln["d"]))
-                hist[key] = round(hist.get(key, 0) + ln["t"], 1)
-                free_s += ln["t"]
+                free_t += ln["t"]
                 run += ln["d"]
             else:
                 other_s += ln["t"]
+        # el ritmo se toma por intervalo (promedio del tramo), no pileta por pileta:
+        # cada pileta suelta varía mucho por las vueltas y los cortes del reloj
+        if run:
+            key = str(round(100 * free_t / run))
+            hist[key] = round(hist.get(key, 0) + free_t, 1)
+            free_s += free_t
         longest = max(longest, run if all(ln.get("stroke") == FREESTYLE for ln in (it.get("lengths") or []) if valid_length(ln)) else 0)
     return {"pace_hist": hist, "free_s": round(free_s), "other_s": round(other_s), "drill_s": round(drill_s), "longest_free_m": round(longest)}
 
