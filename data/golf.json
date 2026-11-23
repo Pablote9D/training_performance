@@ -1,10 +1,14 @@
 {
- "updated": "2026-11-22T07:12:25+00:00",
- "handicap": 29.2,
+ "updated": "2026-11-23T07:58:10+00:00",
+ "handicap": 26.8,
  "handicap_history": [
   {
    "date": "2026-11-01",
    "value": 29.2
+  },
+  {
+   "date": "2026-11-23",
+   "value": 26.8
   }
  ],
  "clubs": [
@@ -16,25 +20,25 @@
    "shots": 1
   },
   {
+   "name": "Driver",
+   "type": 1,
+   "avg_m": 206,
+   "max_m": 292,
+   "shots": 17
+  },
+  {
    "name": "Hierro 6",
    "type": 14,
    "avg_m": 188,
    "max_m": 331,
-   "shots": 67
+   "shots": 76
   },
   {
    "name": "Madera 5",
    "type": 3,
-   "avg_m": 180,
+   "avg_m": 176,
    "max_m": 196,
-   "shots": 14
-  },
-  {
-   "name": "Driver",
-   "type": 1,
-   "avg_m": 178,
-   "max_m": 262,
-   "shots": 11
+   "shots": 16
   },
   {
    "name": "Híbrido 4",
@@ -46,30 +50,30 @@
   {
    "name": "Hierro 7",
    "type": 15,
-   "avg_m": 165,
+   "avg_m": 162,
    "max_m": 174,
-   "shots": 5
+   "shots": 7
   },
   {
    "name": "Hierro 8",
    "type": 16,
    "avg_m": 152,
    "max_m": 273,
-   "shots": 22
+   "shots": 26
   },
   {
    "name": "Hierro 9",
    "type": 17,
-   "avg_m": 145,
-   "max_m": 179,
-   "shots": 20
+   "avg_m": 146,
+   "max_m": 203,
+   "shots": 24
   },
   {
    "name": "PW",
    "type": 18,
-   "avg_m": 141,
+   "avg_m": 140,
    "max_m": 223,
-   "shots": 14
+   "shots": 15
   },
   {
    "name": "Madera 3",
@@ -90,14 +94,14 @@
    "type": 13,
    "avg_m": 123,
    "max_m": 153,
-   "shots": 5
+   "shots": 6
   },
   {
    "name": "LW",
    "type": 21,
-   "avg_m": 90,
-   "max_m": 139,
-   "shots": 24
+   "avg_m": 91,
+   "max_m": 158,
+   "shots": 29
   }
  ],
  "rounds": [
@@ -1156,6 +1160,188 @@
      "par": 5,
      "strokes": 8,
      "putts": 3,
+     "fairway": "LEFT",
+     "penalties": 0
+    }
+   ]
+  },
+  {
+   "id": 392791212,
+   "date": "2026-11-17",
+   "time": "20:53",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 9,
+   "strokes": 66,
+   "par": 36,
+   "putts": 21,
+   "fairways_hit": 3,
+   "fairways_left": 4,
+   "fairways_right": 0,
+   "fairways_total": 7,
+   "gir": 0,
+   "gir_total": 9,
+   "penalties": 0,
+   "holes": [
+    {
+     "n": 1,
+     "par": 4,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 2,
+     "par": 4,
+     "strokes": 11,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 3,
+     "par": 3,
+     "strokes": 5,
+     "putts": 3,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 4,
+     "par": 4,
+     "strokes": 7,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 5,
+     "par": 4,
+     "strokes": 7,
+     "putts": 3,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 6,
+     "par": 5,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 7,
+     "par": 3,
+     "strokes": 7,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 8,
+     "par": 4,
+     "strokes": 8,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 9,
+     "par": 5,
+     "strokes": 9,
+     "putts": 3,
+     "fairway": "LEFT",
+     "penalties": 0
+    }
+   ]
+  },
+  {
+   "id": 392791424,
+   "date": "2026-11-22",
+   "time": "12:05",
+   "course": "Alta Gracia Golf Club",
+   "holes_played": 9,
+   "strokes": 40,
+   "par": 36,
+   "putts": 17,
+   "fairways_hit": 3,
+   "fairways_left": 2,
+   "fairways_right": 2,
+   "fairways_total": 7,
+   "gir": 5,
+   "gir_total": 9,
+   "penalties": 0,
+   "holes": [
+    {
+     "n": 10,
+     "par": 4,
+     "strokes": 4,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 11,
+     "par": 5,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 12,
+     "par": 3,
+     "strokes": 3,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 13,
+     "par": 4,
+     "strokes": 6,
+     "putts": 2,
+     "fairway": "LEFT",
+     "penalties": 0
+    },
+    {
+     "n": 14,
+     "par": 4,
+     "strokes": 4,
+     "putts": 2,
+     "fairway": "RIGHT",
+     "penalties": 0
+    },
+    {
+     "n": 15,
+     "par": 4,
+     "strokes": 5,
+     "putts": 2,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 16,
+     "par": 3,
+     "strokes": 3,
+     "putts": 2,
+     "fairway": null,
+     "penalties": 0
+    },
+    {
+     "n": 17,
+     "par": 5,
+     "strokes": 5,
+     "putts": 1,
+     "fairway": "HIT",
+     "penalties": 0
+    },
+    {
+     "n": 18,
+     "par": 4,
+     "strokes": 5,
+     "putts": 2,
      "fairway": "LEFT",
      "penalties": 0
     }
